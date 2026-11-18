@@ -23,7 +23,8 @@ Verified on 11 Nov 2026:
 | --- | --- |
 | GitHub | `https://github.com/achwanyaa/Realogic`, branch `main`, one commit (foundation). This handoff and `CLAUDE.md` were added after that commit and may still need committing. |
 | Local folder | `C:\Users\sajim\Desktop\Realogic` (Windows, PowerShell). |
-| Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **The 4 migrations are applied** (11 Nov 2026) and the API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor not yet run (dashboard only). No admin staff row yet. Phone sign-in is off, email sign-in is on. |
+| Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **The 4 migrations are applied** (11 Nov 2026) and the API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor run 18 Nov 2026: 0 errors, 6 warnings still to review. The first admin exists: Tete's auth user has an `lb_admin` staff row (its email address was not yet confirmed on 18 Nov, which blocks password sign-in). Phone sign-in is off, email sign-in is on. |
+| Console | Staff sign-in with two-factor is built (milestone 2, step 1). Local: `http://console.localhost:3000/sign-in`. Not reachable on Vercel yet: no console host is mapped (`CONSOLE_DOMAINS` in `src/lib/sites.ts`). |
 | Local env | Keys are in `.env` (git-ignored). `.env.example` is the blank template. |
 | Tests | `npm test`: 61 pass. Lint, typecheck and build pass on the Windows machine (11 Nov 2026). `typecheck` runs `next typegen` first so `PageProps`/`LayoutProps` exist on a fresh clone. |
 | Vercel | Project `realogic` under `achwanyaas-projects` (created 11 Nov 2026; the older `reallogic-demo` is the prototype, not this repo). Local folder is linked (`.vercel/`, git-ignored). The four env vars are set for Production and Preview; `SUPABASE_SECRET_KEY` is Sensitive. Connected to GitHub: every push to `main` deploys to production at **https://realogic-mu.vercel.app** (first good deploy 12 Nov 2026). The other `*-achwanyaas-projects.vercel.app` aliases sit behind Vercel login. `vercel.json` pins the framework to Next.js (the CLI-created project defaulted to "Other"). Deploy through Git, not `vercel deploy` from this folder: the CLI does not read `.gitignore` and can upload `.env` with the source. |
@@ -79,7 +80,12 @@ src/app/layout.tsx                Root layout, four fonts via next/font
 src/app/globals.css               Design tokens (@theme), .hatch and .blueprint textures
 src/app/sites/[site]/layout.tsx   Client portal shell: contact strip, header, footer
 src/app/sites/[site]/page.tsx     Portal home (static content only so far)
-src/app/console/page.tsx          LuxuryBoma console placeholder
+src/lib/console/access.ts         Console redirect rule used by the proxy (pure, unit-tested)
+src/lib/console/staff.ts          Console data access layer: requireStaff() and friends (server-only)
+src/app/console/actions.ts        Sign-in, two-factor set-up and check, sign-out (Server Actions)
+src/app/console/sign-in/          Staff sign-in page
+src/app/console/two-factor/       Authenticator app set-up and code check
+src/app/console/page.tsx          Console home (behind requireStaff)
 src/app/lb/page.tsx               luxuryboma.com placeholder
 src/components/ProvenancePill.tsx Provenance label (LuxuryBoma identity)
 supabase/migrations/              Schema, in order (4 files)
@@ -190,7 +196,7 @@ Goal: Tete can enter one godown completely, with facts and their provenance. Don
 
 Build in this order, under `src/app/console/`:
 
-1. **Staff sign-in with two-factor.** Email and password, then TOTP enrol (first time) or verify. Use Supabase MFA (`supabase.auth.mfa.enroll`, `challenge`, `verify`). After verify the session is `aal2`. Guard every console route on the server: no session or not `aal2` or no LuxuryBoma `staff_members` row -> redirect to sign-in. Check the current Supabase MFA docs rather than relying on memory.
+1. **Staff sign-in with two-factor.** *Built 18 Nov 2026.* `/sign-in` (email and password; non-staff accounts are signed out again), `/two-factor` (first visit: set up an authenticator app from a QR code; after that: enter the code), `/` (console home). Three layers: `src/proxy.ts` redirects by the token's `aal` (rule in `src/lib/console/access.ts`, unit-tested); every page and Server Action calls `src/lib/console/staff.ts` (`requireStaff`, `getTwoFactorStep`, `requireStaffAnyLevel`), which verifies the token and reads the staff row; the database refuses staff data without `aal2`. Every new console page must call `requireStaff()` inside a `<Suspense>` boundary, and every new Server Action must call it first.
 2. **Properties list and create/edit.** Fields from `properties`. Status moves draft -> in review -> live -> paused / sold or leased. The "publish" action must show why it is blocked (no site visit date, or the user is an editor).
 3. **Facts editor.** One row per `spec_definitions` entry for the property type. For each: value (number, yes/no or text by `value_type`), display value, unit, provenance label, method, source, linked document, checked on. Enforce in the form what the database enforces: "From drawings" needs a source; "Measured" needs a date; "Not yet checked" has no value. Show the change history from `spec_value_history`. Show "self-reviewed" when reviewer and checker are the same person.
 4. **Documents.** Upload to a **private** Supabase Storage bucket; store the path in `documents.file_path`. Needs a new migration for the bucket and its storage policies (LuxuryBoma staff write; reads only through short-lived signed URLs created on the server after checking the `documents` row's visibility). Storage is not covered by the PGlite tests, so test it against the real project.
@@ -284,3 +290,11 @@ The prototype is the design source of truth, but it lives in claude.ai artifacts
 - Keep sample data clearly labelled as sample. Nothing unverified may appear on the live site as a checked fact.
 - One milestone at a time; new ideas go on a "later" list.
 - Commit in small steps with the four checks passing. The repo is public.
+
+## 15. Later
+
+- **Recovery codes for two-factor.** Supabase has them in auth-js 2.119 but marks them experimental. Until then, a lost phone means an admin deletes the factor in the Supabase dashboard (Authentication > Users > the user > MFA factors) and the staff member sets up again.
+- **A console address on Vercel.** Either `console.luxuryboma.com` once the domain is ready, or a Vercel alias added to `CONSOLE_DOMAINS`.
+- **Security advisor warnings** (6 on 18 Nov 2026): review and fix or record why they stay.
+- **Portal home instant-navigation warning** in development: `src/app/sites/[site]/page.tsx` awaits `params` outside `<Suspense>`. Fix with the portal milestone.
+- **The portal "feels like it's missing something"** (Tete, 18 Nov 2026). Ask what, after the staff side.
