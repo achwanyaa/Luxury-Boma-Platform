@@ -4,6 +4,7 @@ import type { Provenance } from "@/components/ProvenancePill";
 import { supabaseConfigured } from "@/lib/supabase/env";
 import { createPublicClient } from "@/lib/supabase/public";
 import { availabilityText, formatPrice, type Fact, type PortalProperty, type SpecGroup } from "./listing-model";
+import { MEDIA_BUCKET } from "@/lib/console/media-rules";
 import { SAMPLE_PROPERTIES } from "./sample";
 
 // Public reads for a client's portal. They run as `anon`, so row-level
@@ -26,7 +27,7 @@ const PROPERTY_SELECT = `
   id, slug, reference, name, area_label, near, address, site_visited_on, published_at,
   listings ( deal, price, currency, price_period, price_on_request, available_from, availability_note, description, status ),
   spec_values ( spec_key, space_id, display_value, value_number, value_boolean, label, method, source, checked_on ),
-  media ( kind, url, caption, is_main, sort_order )
+  media ( kind, url, file_path, caption, is_main, sort_order )
 `;
 
 async function loadProperties(siteSlug: string): Promise<PortalProperty[]> {
@@ -46,6 +47,10 @@ async function loadProperties(siteSlug: string): Promise<PortalProperty[]> {
   ]);
   if (error) throw new Error(`Could not read the listings: ${error.message}`);
   if (defError) throw new Error(`Could not read the spec catalogue: ${defError.message}`);
+
+  // Files in the public media bucket; links (the 3D tour, older photos) as they are.
+  const mediaUrl = (m: { url: string | null; file_path: string | null }) =>
+    m.file_path ? supabase.storage.from(MEDIA_BUCKET).getPublicUrl(m.file_path).data.publicUrl : m.url;
 
   const catalogue = new Map((definitions ?? []).map((d) => [d.key, d]));
   const today = new Date().toISOString().slice(0, 10);
@@ -98,8 +103,13 @@ async function loadProperties(siteSlug: string): Promise<PortalProperty[]> {
         publishedAt: row.published_at,
         offers,
         facts,
-        // Photos in storage need the media bucket (milestone 2, step 5); links work now.
-        photos: media.filter((m) => m.kind === "photo" && m.url).map((m) => ({ url: m.url!, caption: m.caption })),
+        photos: media
+          .filter((m) => m.kind === "photo" && mediaUrl(m))
+          .map((m) => ({ url: mediaUrl(m)!, caption: m.caption })),
+        video: (() => {
+          const v = media.find((m) => m.kind === "video" && mediaUrl(m));
+          return v ? { url: mediaUrl(v)! } : null;
+        })(),
         tourUrl: media.find((m) => m.kind === "tour" && m.url)?.url ?? null,
         sample: false,
       };

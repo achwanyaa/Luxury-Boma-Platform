@@ -81,6 +81,16 @@ Screens (Media section of the property hub):
 
 ### 5. Portal shows the media, and refreshes on change
 
+**Done 25 Nov 2026.** `src/lib/portal/listings.ts` turns stored files into public URLs, and `PortalProperty` has `video`. The property page has `src/components/portal/Gallery.tsx`:
+- One large view with arrows, a caption and counter, and a thumbnail strip.
+- The walkthrough comes first as the main photo with a play button. Nothing of the video downloads until it is tapped (checked in the network log).
+- "Walk through in 3D" sits on the picture on wider screens and under it on phones.
+- Listing cards use the main photo.
+- The main photo is the Open Graph share image (https photos only).
+- Sample godown A1 has five drawn "SAMPLE PHOTO" placeholders for design checks.
+
+Checked in the browser at desktop and phone width with the samples. A temporary sample video and tour link were used for the check and then removed. Not checked yet: real uploaded photos on a live property.
+
 - `src/lib/portal/listings.ts`: select `file_path`, turn it into a public URL (`storage.from('property-media').getPublicUrl`), add `videoUrl` and `videoPoster` to `PortalProperty` in `listing-model.ts`. Update `src/lib/portal/sample.ts` to match.
 - Property page (`src/app/sites/[site]/properties/[slug]/page.tsx`): a gallery at the top. First item is the video when there is one, shown as the poster image with a play button; the `<video>` uses `preload="none"`, `controls`, `playsInline`, muted, and loads nothing until tapped. Then the photos. Beside or under it, a "Walk through in 3D" button that opens the tour link in a new tab. No autoplay and no hover-to-play: most buyers are on phones and mobile data.
 - Listing cards stay photo-only (main photo).

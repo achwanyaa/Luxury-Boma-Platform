@@ -5,6 +5,22 @@
 
 import type { Fact, PortalProperty } from "./listing-model";
 
+// Drawn placeholders, clearly marked, so the gallery can be checked without real photos.
+const samplePhoto = (n: number, caption: string) => ({
+  url: `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><rect width="800" height="600" fill="#${["D3DCE8", "C9D4E6", "EEF1F6"][n % 3]}"/><path d="M0 600 800 0M-200 600 600 0M200 600 1000 0" stroke="#0C1B33" stroke-opacity=".08" stroke-width="40"/><text x="400" y="290" text-anchor="middle" font-family="Arial" font-size="44" font-weight="700" fill="#3B4A63">SAMPLE PHOTO ${n}</text><text x="400" y="345" text-anchor="middle" font-family="Arial" font-size="28" fill="#3B4A63">${caption}</text></svg>`,
+  )}`,
+  caption,
+});
+
+const SAMPLE_PHOTOS = [
+  samplePhoto(1, "Front of the unit"),
+  samplePhoto(2, "Main floor"),
+  samplePhoto(3, "Under the mezzanine"),
+  samplePhoto(4, "Stairs"),
+  samplePhoto(5, "Office"),
+];
+
 const DRAWING = "Drawing A-101 rev C, Sketch3D Ltd (developer's architect)";
 
 type Row = [key: string, display: string, value: number | boolean | null, label: Fact["label"], source?: string, method?: string];
@@ -82,7 +98,8 @@ export const SAMPLE_PROPERTIES: PortalProperty[] = [
       ["temperature_control", "None", false, "measured", undefined, "No cooling plant on site"],
       ["nema_licence", "No record found", null, "not_found", "A missing record does not mean all is clear.", "NEMA public register searched"],
     ]),
-    photos: [],
+    photos: SAMPLE_PHOTOS,
+    video: null,
     tourUrl: null,
     sample: true,
   },
@@ -122,6 +139,7 @@ export const SAMPLE_PROPERTIES: PortalProperty[] = [
       ["power_supply", "Not yet checked", null, "not_yet_checked"],
     ]),
     photos: [],
+    video: null,
     tourUrl: null,
     sample: true,
   },
@@ -153,6 +171,7 @@ export const SAMPLE_PROPERTIES: PortalProperty[] = [
       ["power_supply", "315 kVA", 315, "declared", "Stated by Realogic. Not yet checked."],
     ]),
     photos: [],
+    video: null,
     tourUrl: null,
     sample: true,
   },

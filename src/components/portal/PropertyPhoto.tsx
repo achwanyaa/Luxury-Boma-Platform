@@ -14,8 +14,8 @@ export function PropertyPhoto({
   const photo = property.photos[index];
   if (photo) {
     return (
-      // Photo hosts are not fixed yet (storage bucket comes with milestone 2,
-      // step 5), so a plain img rather than next/image for now.
+      // Photos come from the Supabase Storage bucket; a plain img keeps them off
+      // the image optimiser, which would need the host configured.
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={photo.url}

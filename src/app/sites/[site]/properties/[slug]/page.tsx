@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PropertyPhoto } from "@/components/portal/PropertyPhoto";
+import { Gallery } from "@/components/portal/Gallery";
 import { ProvenanceBar } from "@/components/portal/ProvenanceBar";
 import { ProvenancePill } from "@/components/ProvenancePill";
 import {
@@ -38,7 +38,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: property.name,
     description,
-    openGraph: { title: `${property.name} · ${site.name}`, description, images: property.photos.slice(0, 1).map((p) => p.url) },
+    // The main photo is the picture WhatsApp and others show with a shared link.
+    openGraph: {
+      title: `${property.name} · ${site.name}`,
+      description,
+      images: property.photos.filter((p) => p.url.startsWith("https://")).slice(0, 1).map((p) => ({ url: p.url, alt: p.caption ?? property.name })),
+    },
   };
 }
 
@@ -191,13 +196,13 @@ async function PropertyDetails({ params }: Pick<Props, "params">) {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-2 overflow-hidden rounded-card md:grid-cols-[2fr_1fr]">
-          <PropertyPhoto property={property} className="aspect-[16/10] md:aspect-auto md:h-full md:min-h-[380px]" />
-          <div className="hidden grid-rows-2 gap-2 md:grid">
-            <PropertyPhoto property={property} index={1} className="h-full" />
-            <PropertyPhoto property={property} index={2} className="h-full" />
-          </div>
-        </div>
+        <Gallery
+          name={property.name}
+          reference={property.reference}
+          photos={property.photos}
+          video={property.video}
+          tourUrl={property.tourUrl}
+        />
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="flex flex-col gap-7">

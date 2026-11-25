@@ -43,6 +43,9 @@ export type Offer = {
 
 export type Photo = { url: string; caption: string | null };
 
+/** The short walkthrough video. It plays only when tapped, with the main photo as its cover. */
+export type Walkthrough = { url: string };
+
 export type PortalProperty = {
   slug: string;
   reference: string;
@@ -54,7 +57,9 @@ export type PortalProperty = {
   publishedAt: string | null;
   offers: Offer[];
   facts: Fact[];
+  /** Main photo first, then the rest in the order LuxuryBoma set. */
   photos: Photo[];
+  video: Walkthrough | null;
   tourUrl: string | null;
   /** True only for the development sample, never for real data. */
   sample: boolean;
