@@ -144,6 +144,14 @@ The facts editor has a "Linked document" select. Choosing one fills an empty sou
 
 ### 9. Enter Rafiki (Tete, through the console; help only if something breaks)
 
+**Started 25 Nov 2026, at Tete's request, by a one-off script with the server key** (not committed), because the console sign-in needs Tete's authenticator app. Entered as a **draft**:
+- reference RL-RFK-A7, name "Rafiki Machinery Industrial Park, Godown A7", slug `rafiki-machinery-godown-a7`;
+- area Ruiru, designed and developed by Sketch3D Ltd, site visit 30 Sep 2026 (the pano capture date);
+- the 12 photos from step 8, with captions, the front of the unit as main photo;
+- the Realsee tour link.
+
+Still to do in the console: a listing (deal and price), the facts with honest labels, the video when ready, then send for review and publish. The name and unit number are placeholders until Tete confirms them.
+
 - Name "Rafiki Machinery Industrial Park, Godown A7" and reference `RL-RFK-A7`: **placeholders** until Tete confirms the unit number. Designed by Sketch3D Ltd.
 - Labels the sources can honestly earn:
   - Architect's model or drawings → From drawings, source names the drawing (or the model file and its date) and "Sketch3D Ltd".
