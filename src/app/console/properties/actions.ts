@@ -171,7 +171,7 @@ export async function saveFact(
 
   const { data: current, error: readError } = await supabase
     .from("spec_values")
-    .select("id, value_number, value_boolean, value_text, display_value, unit, label, method, source, checked_on, note")
+    .select("id, value_number, value_boolean, value_text, display_value, unit, label, method, source, checked_on, note, document_id")
     .eq("property_id", property.id)
     .eq("spec_key", specKey)
     .is("space_id", null)

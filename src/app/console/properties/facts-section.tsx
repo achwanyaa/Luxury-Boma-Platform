@@ -4,7 +4,7 @@ import type { Staff } from "@/lib/console/staff";
 import { SPEC_GROUP_LABEL } from "@/lib/portal/listing-model";
 import { ui } from "../ui";
 import { markFactReviewed, saveFact } from "./actions";
-import { FactEditor } from "./fact-editor";
+import { FactEditor, type DocumentOption } from "./fact-editor";
 
 const GROUP_ORDER: FactGroup[] = ["structure", "access", "power", "legal", "location"];
 
@@ -15,10 +15,12 @@ export async function FactsSection({
   propertyId,
   propertyType,
   staff,
+  documents,
 }: {
   propertyId: string;
   propertyType: string;
   staff: Staff;
+  documents: DocumentOption[];
 }) {
   const [facts, names] = await Promise.all([getFactsForProperty(propertyId, propertyType), staffNames()]);
   const nameOf = (userId: string | null) =>
@@ -71,6 +73,7 @@ export async function FactsSection({
                 source: h.source,
               }))}
               canReview={canReview}
+              documents={documents}
               save={saveFact.bind(null, propertyId, definition.key)}
               review={current ? markFactReviewed.bind(null, propertyId, current.id) : null}
             />

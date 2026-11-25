@@ -91,3 +91,44 @@ describe("property-media bucket", () => {
     expect(kinds.split(",")).toContain("video");
   });
 });
+
+describe("property-documents bucket", () => {
+  const DOC = "dddddddd-0000-4000-8000-000000000001";
+
+  beforeAll(async () => {
+    await db.exec(`insert into storage.objects (id, bucket_id, name) values ('${DOC}', 'property-documents', '${CLIENT}/p/drawing.pdf')`);
+  });
+
+  it("is private, capped at 50 MB, and takes PDFs and scans only", async () => {
+    const [bucket] = await rows<{ public: boolean; file_size_limit: string; allowed_mime_types: string[] }>(
+      db,
+      "select public, file_size_limit, allowed_mime_types from storage.buckets where id = 'property-documents'",
+    );
+    expect(bucket.public).toBe(false);
+    expect(Number(bucket.file_size_limit)).toBe(50 * 1024 * 1024);
+    expect(bucket.allowed_mime_types.sort()).toEqual(["application/pdf", "image/jpeg", "image/png"]);
+  });
+
+  it("lets LuxuryBoma staff with two-factor read, upload and remove", async () => {
+    await as(db, user(LB_EDITOR, { twoFactor: true }), async (tx) => {
+      expect((await rows(tx, `select id from storage.objects where id = '${DOC}'`)).length).toBe(1);
+      await tx.query(upload(`${CLIENT}/p/new.pdf`, "property-documents"));
+      expect((await tx.query(`delete from storage.objects where id = '${DOC}'`)).affectedRows).toBe(1);
+    });
+  });
+
+  it.each([
+    ["staff without two-factor", user(LB_ADMIN)],
+    ["client staff", user(CLIENT_STAFF, { twoFactor: true })],
+    ["a signed-in stranger", user(STRANGER)],
+    ["an anonymous visitor", anon],
+  ])("shows %s nothing and lets them change nothing", async (_who, caller) => {
+    const seen = await as(db, caller, async (tx) => {
+      const listed = await rows(tx, `select id from storage.objects where bucket_id = 'property-documents'`);
+      const removed = await tx.query(`delete from storage.objects where id = '${DOC}'`);
+      return listed.length + (removed.affectedRows ?? 0);
+    });
+    expect(seen).toBe(0);
+    await expect(as(db, caller, (tx) => tx.query(upload(`${CLIENT}/p/x.pdf`, "property-documents")))).rejects.toThrow();
+  });
+});

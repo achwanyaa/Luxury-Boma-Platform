@@ -23,10 +23,10 @@ Last updated 23 Nov 2026:
 | --- | --- |
 | GitHub | `https://github.com/achwanyaa/Luxury-Boma-Platform` (renamed from `Realogic` in Nov 2026; the old address redirects), branch `main`. Everything up to the console build plan is committed and pushed. Tete may switch the repo to private; until then treat it as public. |
 | Local folder | `C:\Users\sajim\Desktop\Realogic` (Windows, PowerShell). |
-| Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **6 migrations are applied**: the first 4 on 11 Nov 2026, then the video media kind and the public `property-media` bucket (photos and video, staff-only writes) on 25 Nov 2026. The API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor run 18 Nov 2026: 0 errors, 6 warnings still to review. The first admin exists: Tete's auth user has an `lb_admin` staff row (email marked confirmed through the admin API on 18 Nov 2026). Phone sign-in is off, email sign-in is on. |
+| Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **7 migrations are applied**: the first 4 on 11 Nov 2026, then on 25 Nov 2026 the video media kind, the public `property-media` bucket (photos and video, staff-only writes) and the private `property-documents` bucket (staff-only, read through 5-minute signed links). The API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor run 18 Nov 2026: 0 errors, 6 warnings still to review. The first admin exists: Tete's auth user has an `lb_admin` staff row (email marked confirmed through the admin API on 18 Nov 2026). Phone sign-in is off, email sign-in is on. |
 | Console | Staff sign-in with two-factor is built (milestone 2, step 1). Local: `http://console.localhost:3000/sign-in`. Not reachable on Vercel yet: no console host is mapped (`CONSOLE_DOMAINS` in `src/lib/sites.ts`). |
 | Local env | Keys are in `.env` (git-ignored). `.env.example` is the blank template. |
-| Tests | `npm test`: 74 pass (61 data-wall and seed tests, 4 console redirect tests, 9 listing filter and wording tests). Lint, typecheck and build pass on the Windows machine (18 Nov 2026). `typecheck` runs `next typegen` first so `PageProps`/`LayoutProps` exist on a fresh clone. |
+| Tests | `npm test`: 153 pass in 11 files (data walls, storage policies, console rules for properties, listings, facts, media, documents and publishing, portal wording). Lint, typecheck and build pass on the Windows machine (25 Nov 2026). `typecheck` runs `next typegen` first so `PageProps`/`LayoutProps` exist on a fresh clone. |
 | Vercel | Project `realogic` under `achwanyaas-projects` (created 11 Nov 2026; the older `reallogic-demo` is the prototype, not this repo). Local folder is linked (`.vercel/`, git-ignored). The four env vars are set for Production and Preview; `SUPABASE_SECRET_KEY` is Sensitive. Connected to GitHub: every push to `main` deploys to production at **https://realogic-mu.vercel.app** (first good deploy 12 Nov 2026). The other `*-achwanyaas-projects.vercel.app` aliases sit behind Vercel login. `vercel.json` pins the framework to Next.js (the CLI-created project defaulted to "Other"). Deploy through Git, not `vercel deploy` from this folder: the CLI does not read `.gitignore` and can upload `.env` with the source. |
 
 ### Progress log
@@ -52,6 +52,17 @@ Last updated 23 Nov 2026:
 - The real project has no live property yet, so the live site shows the "first listings are being checked" empty state. For design work, `PORTAL_SAMPLE_LISTINGS=1` in `.env` shows three clearly marked sample godowns (`src/lib/portal/sample.ts`), development builds only.
 - The portal layout now reads `params` inside `<Suspense>` (header and footer), which fixed the instant-navigation warning listed in section 15.
 - Copy avoids promises Realogic hasn't made (reply times, build specs). Check the "Who we are" and "What we do" wording with Tete.
+
+**Milestone 2, Console: steps 2 to 7 built** (25 Nov 2026), following `PLAN-CONSOLE.md`, which records each step:
+- properties list and create/edit;
+- listing per deal;
+- facts editor with labels, history, review and linked documents;
+- photos, video walkthrough and Realsee link;
+- portal gallery;
+- status panel with a publish checklist;
+- private documents.
+
+All of it is checked by tests, and the two buckets were checked live with throwaway files. **None of the signed-in screens have been clicked through yet**, because that needs Tete's password and authenticator app.
 
 **What remains, in order**
 
@@ -122,10 +133,16 @@ src/lib/console/staff.ts          Console data access layer: requireStaff() and 
 src/app/console/actions.ts        Sign-in, two-factor set-up and check, sign-out (Server Actions)
 src/app/console/sign-in/          Staff sign-in page
 src/app/console/two-factor/       Authenticator app set-up and code check
-src/app/console/page.tsx          Console home (behind requireStaff)
+src/app/console/page.tsx          Console home: counts by status (behind requireStaff)
+src/app/console/properties/       List, new, and the property page: status panel, listing, media, documents, facts, details
+src/app/console/documents/[id]/   Opens a private document through a 5-minute signed link (staff only)
+src/lib/console/*-rules.ts, *-form.ts  Pure, unit-tested rules for each console form
+src/lib/console/properties.ts, facts.ts  Console reads (server-only)
+src/components/portal/Gallery.tsx Property page gallery: walkthrough video first, photos, 3D tour button
+scripts/pano-stills.mjs           Cuts ordinary photos from 360° panos (output stays outside the repo)
 src/app/lb/page.tsx               luxuryboma.com placeholder
 src/components/ProvenancePill.tsx Provenance label (LuxuryBoma identity)
-supabase/migrations/              Schema, in order (6 files)
+supabase/migrations/              Schema, in order (7 files)
 supabase/seed.sql                 SAMPLE data for local development only
 tests/helpers/db.ts               In-memory Postgres + a small Supabase auth shim
 tests/data-walls.test.ts          The wall and independence-rule tests

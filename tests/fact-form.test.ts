@@ -90,7 +90,7 @@ describe("facts: values and display text", () => {
   it("round-trips a stored fact into the form", () => {
     const stored = {
       value_number: null, value_boolean: true, value_text: null, display_value: "Yes", unit: null,
-      label: "declared" as const, method: null, source: "Realogic", checked_on: null, note: null,
+      label: "declared" as const, method: null, source: "Realogic", checked_on: null, note: null, document_id: null,
     };
     expect(factToInput(stored)).toMatchObject({ value: "yes", source: "Realogic", label: "declared" });
     expect(factToInput(null)).toEqual(EMPTY_FACT);
@@ -126,6 +126,14 @@ describe("facts: changes, history and review", () => {
     expect(reviewState("u1", null)).toBe("not_reviewed");
     expect(reviewState("u1", "u1")).toBe("self_reviewed");
     expect(reviewState("u1", "u2")).toBe("reviewed");
+  });
+
+  it("links a fact to a document, and notices when the link changes", () => {
+    const doc = "dddddddd-0000-4000-8000-000000000001";
+    const linked = validateFact(clearHeight, input({ label: "from_drawings", value: "9", source: "A-201, Sketch3D Ltd", document_id: doc }), TODAY);
+    expect(linked.ok && linked.values.document_id).toBe(doc);
+    expect(linked.ok && factChanged({ ...linked.values, document_id: null }, linked.values)).toBe(true);
+    expect(validateFact(clearHeight, input({ document_id: "not-a-doc" }), TODAY).ok).toBe(false);
   });
 
   it("explains each database refusal in words", () => {

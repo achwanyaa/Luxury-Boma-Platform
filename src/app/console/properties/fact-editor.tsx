@@ -24,6 +24,8 @@ export type FactSummary = {
   reviewedBy: string | null;
 };
 
+export type DocumentOption = { id: string; citation: string };
+
 export type FactHistoryView = {
   key: string;
   when: string;
@@ -40,6 +42,7 @@ type Props = {
   summary: FactSummary | null;
   history: FactHistoryView[];
   canReview: boolean;
+  documents: DocumentOption[];
   save: (prev: FactFormState, formData: FormData) => Promise<FactFormState>;
   review: (() => Promise<ReviewState>) | null;
 };
@@ -78,7 +81,7 @@ export function FactEditor(props: Props) {
 
       <div className="flex flex-col gap-5 border-t border-line-soft bg-page/60 px-5 py-4">
         <form action={action} className="flex flex-col gap-4" key={JSON.stringify(values)}>
-          <FactFields definition={definition} values={values} errors={state?.errors ?? {}} />
+          <FactFields definition={definition} values={values} errors={state?.errors ?? {}} documents={props.documents} />
           {state?.message && (
             <p role={state.saved ? "status" : "alert"} className={state.errors && Object.keys(state.errors).length ? ui.error : "text-sm text-muted"}>
               {state.message}
@@ -105,12 +108,17 @@ function FactFields({
   definition,
   values,
   errors,
+  documents,
 }: {
   definition: FactDefinition;
   values: FactInput;
   errors: Partial<Record<FactField, string>>;
+  documents: DocumentOption[];
 }) {
   const [label, setLabel] = useState(values.label as Provenance);
+  const [source, setSource] = useState(values.source);
+  const [documentId, setDocumentId] = useState(values.document_id);
+  const linked = documents.find((d) => d.id === documentId);
   const [value, setValue] = useState(values.value);
   const carriesValue = LABELS_WITH_VALUE.includes(label);
   const option = PROVENANCE_OPTIONS.find((o) => o.value === label);
@@ -193,12 +201,42 @@ function FactFields({
           <span className={ui.label}>Source{label === "from_drawings" ? " (drawing and author)" : ""}</span>
           <input
             name="source"
-            defaultValue={values.source}
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
             placeholder={label === "from_drawings" ? "Drawing A-201 rev B, Sketch3D Ltd" : "Where the figure came from"}
             className={ui.input}
             {...aria("source")}
           />
           {fieldError("source")}
+          {linked && source !== linked.citation && (
+            <button type="button" onClick={() => setSource(linked.citation)} className={`${ui.linkButton} w-fit text-left`}>
+              Use “{linked.citation}”
+            </button>
+          )}
+        </label>
+        <label className={ui.field}>
+          <span className={ui.label}>Linked document</span>
+          <select
+            name="document_id"
+            value={documentId}
+            onChange={(e) => {
+              const next = e.target.value;
+              setDocumentId(next);
+              const doc = documents.find((d) => d.id === next);
+              // Fill an empty source from the document; never overwrite one that was typed.
+              if (doc && source.trim() === "") setSource(doc.citation);
+            }}
+            className={ui.input}
+            {...aria("document_id")}
+          >
+            <option value="">None</option>
+            {documents.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.citation}
+              </option>
+            ))}
+          </select>
+          {errors.document_id ? fieldError("document_id") : documents.length === 0 && <span className="text-sm text-muted">Add documents above to link them here.</span>}
         </label>
         <label className={ui.field}>
           <span className={ui.label}>Method</span>

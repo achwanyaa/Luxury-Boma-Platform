@@ -50,7 +50,7 @@ export async function getProperty(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("properties")
-    .select("*, clients ( id, name, slug ), listings ( * ), media ( * )")
+    .select("*, clients ( id, name, slug ), listings ( * ), media ( * ), documents ( * ), spec_values ( document_id )")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Could not read the property: ${error.message}`);

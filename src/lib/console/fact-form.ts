@@ -46,6 +46,8 @@ export type FactInput = {
   source: string;
   checked_on: string;
   note: string;
+  /** The documents row this fact cites, or empty. */
+  document_id: string;
 };
 
 export type FactField = keyof FactInput;
@@ -63,6 +65,7 @@ export type FactValues = {
   source: string | null;
   checked_on: string | null;
   note: string | null;
+  document_id: string | null;
 };
 
 export type FactRow = FactValues;
@@ -75,6 +78,7 @@ export const EMPTY_FACT: FactInput = {
   source: "",
   checked_on: "",
   note: "",
+  document_id: "",
 };
 
 export function factToInput(row: FactRow | null | undefined): FactInput {
@@ -95,6 +99,7 @@ export function factToInput(row: FactRow | null | undefined): FactInput {
     source: row.source ?? "",
     checked_on: row.checked_on ?? "",
     note: row.note ?? "",
+    document_id: row.document_id ?? "",
   };
 }
 
@@ -111,6 +116,7 @@ export function readFactForm(form: { get(name: string): unknown }): FactInput {
     source: text("source"),
     checked_on: text("checked_on"),
     note: text("note"),
+    document_id: text("document_id"),
   };
 }
 
@@ -180,6 +186,10 @@ export function validateFact(
     errors.checked_on = "Enter the date it was measured.";
   }
 
+  if (input.document_id !== "" && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.document_id)) {
+    errors.document_id = "Choose a document from the list.";
+  }
+
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const orNull = (s: string) => (s === "" ? null : s);
@@ -203,6 +213,7 @@ export function validateFact(
       source: orNull(input.source),
       checked_on: orNull(input.checked_on),
       note: orNull(input.note),
+      document_id: orNull(input.document_id),
     },
   };
 }
@@ -218,6 +229,7 @@ const COMPARED: (keyof FactValues)[] = [
   "source",
   "checked_on",
   "note",
+  "document_id",
 ];
 
 /** True when saving `next` would change the stored fact. Numbers arrive from the API as numbers. */
@@ -259,6 +271,7 @@ export function describeFactError(error: { code?: string; message?: string }): s
     if (text.includes("unchecked_has_no_value")) return "A fact that isn't checked yet can't have a value.";
   }
   if (error.code === "23505") return "This fact was just saved by someone else. Reload the page.";
+  if (error.code === "23503") return "That document no longer belongs to this property. Reload the page and choose again.";
   if (error.code === "42501") return "Your account isn't allowed to make this change.";
   return "Could not save just now. Try again in a minute.";
 }

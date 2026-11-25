@@ -123,6 +123,12 @@ The server re-runs the check before setting live. The update only applies if the
 
 ### 7. Documents
 
+**Done 25 Nov 2026.** Migration `20261125000300_property_documents_bucket.sql` is applied: a private bucket, staff-only, 50 MB, PDF/JPEG/PNG; storage tests are extended. The live bucket was checked with a test file, since deleted: the public address is refused, visitors see nothing, a signed link serves the file, video is refused.
+
+The property page has a Documents section: upload with title, author, number, revision, date, who can open it (default staff only) and a note; list; edit details; remove (refused while a fact cites the document). "Open" goes through `/documents/[id]`, which checks the staff session and redirects to a 5-minute signed link.
+
+The facts editor has a "Linked document" select. Choosing one fills an empty source with the citation ("Title, A-101 rev C, Author"), and a typed source is never overwritten. Rules are in `src/lib/console/document-rules.ts` (tested). Showing public or signed-in documents to buyers comes later. Not checked by hand yet.
+
 - New migration: bucket `property-documents`, **private**; staff-only insert/update/delete policies; no public reads. Extend the storage stub tests.
 - Screen: upload a PDF, with title, number, revision, date, author, visibility (public / signed in / staff), note. Path stored in `documents.file_path`.
 - Facts editor gains a "linked document" select (`spec_values.document_id`); picking one offers to fill `source` as "Drawing <number> rev <revision>, <author>".

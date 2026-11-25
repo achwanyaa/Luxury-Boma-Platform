@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { getProperty, getPublishInput } from "@/lib/console/properties";
 import { moveEffect, moveLabel, publishCheck, STATUS_MOVES } from "@/lib/console/publish-rules";
 import { DEALS, listingToInput } from "@/lib/console/listing-form";
+import { citation } from "@/lib/console/document-rules";
 import { MEDIA_BUCKET } from "@/lib/console/media-rules";
 import { propertyToInput } from "@/lib/console/property-form";
 import { publicFileUrl } from "@/lib/supabase/public";
@@ -12,6 +13,7 @@ import { requireStaff } from "@/lib/console/staff";
 import { ui } from "../../ui";
 import { changeStatus, saveListing, updateProperty } from "../actions";
 import { StatusPanel } from "../status-panel";
+import { DocumentsSection } from "../documents-section";
 import { FactsSection } from "../facts-section";
 import { ListingForm } from "../listing-form";
 import { MediaSection } from "../media-section";
@@ -23,8 +25,6 @@ export const metadata: Metadata = { title: "Property" };
 const dateText = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Not yet";
 
-// Sections added by the next console steps (PLAN-CONSOLE.md 2 to 7).
-const STILL_TO_COME = ["Documents: drawings and reports"];
 
 export default function PropertyPage({ params }: PageProps<"/console/properties/[id]">) {
   return (
@@ -57,6 +57,19 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
     .map((m) => ({ id: m.id, url: fileUrl(m), caption: m.caption ?? "", isMain: m.is_main }));
   const video = property.media.find((m) => m.kind === "video");
   const tour = property.media.find((m) => m.kind === "tour");
+  const documents = property.documents
+    .toSorted((a, b) => a.title.localeCompare(b.title))
+    .map((d) => ({
+      id: d.id,
+      title: d.title,
+      number: d.number ?? "",
+      revision: d.revision ?? "",
+      document_date: d.document_date ?? "",
+      author: d.author,
+      visibility: d.visibility,
+      note: d.note ?? "",
+      citedBy: property.spec_values.filter((v) => v.document_id === d.id).length,
+    }));
   return (
     <>
       <div className="flex flex-col gap-1.5">
@@ -102,7 +115,16 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
             video={video ? { id: video.id, url: fileUrl(video) } : null}
             tourUrl={tour?.url ?? null}
           />
-          <FactsSection propertyId={property.id} propertyType={property.property_type} staff={staff} />
+          <DocumentsSection propertyId={property.id} clientId={property.client_id} documents={documents} />
+          <FactsSection
+            propertyId={property.id}
+            propertyType={property.property_type}
+            staff={staff}
+            documents={documents.map((d) => ({
+              id: d.id,
+              citation: citation({ title: d.title, number: d.number || null, revision: d.revision || null, author: d.author }),
+            }))}
+          />
           <section className="flex flex-col gap-3" aria-labelledby="details-heading">
             <h2 id="details-heading" className={ui.h2}>
               Details
@@ -118,18 +140,6 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
         </div>
         <div className="flex flex-col gap-4 max-lg:order-first lg:sticky lg:top-4">
           <StatusPanel status={property.status} moves={moves} check={check} change={changeStatus.bind(null, property.id)} />
-          <aside className={`${ui.card} flex flex-col gap-3`}>
-            <h2 className={ui.h2}>Still to add here</h2>
-            <ul className="flex flex-col gap-1.5 text-sm text-body">
-              {STILL_TO_COME.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span aria-hidden="true" className="text-muted">○</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <p className="text-sm text-muted">These screens come in the next console steps.</p>
-          </aside>
         </div>
       </div>
     </>

@@ -34,7 +34,7 @@ export async function getFactsForProperty(propertyId: string, propertyType: stri
     supabase
       .from("spec_values")
       .select(
-        "id, spec_key, value_number, value_boolean, value_text, display_value, unit, label, method, source, checked_on, note, checked_by, reviewed_by, reviewed_at",
+        "id, spec_key, value_number, value_boolean, value_text, display_value, unit, label, method, source, checked_on, note, document_id, checked_by, reviewed_by, reviewed_at",
       )
       .eq("property_id", propertyId)
       .is("space_id", null),
