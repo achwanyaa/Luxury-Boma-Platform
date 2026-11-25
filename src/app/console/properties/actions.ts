@@ -1,5 +1,6 @@
 "use server";
 
+import { adminPath } from "@/lib/console/access";
 import { refresh, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import {
@@ -56,7 +57,7 @@ export async function createProperty(_prev: PropertyFormState, formData: FormDat
     return { input, errors: field ? { [field]: message } : {}, message };
   }
 
-  redirect(`/properties/${data.id}`);
+  redirect(adminPath(`/properties/${data.id}`));
 }
 
 export async function updateProperty(

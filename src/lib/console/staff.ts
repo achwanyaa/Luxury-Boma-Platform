@@ -2,7 +2,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
-import { CONSOLE_HOME_PATH, SIGN_IN_PATH, TWO_FACTOR_PATH } from "./access";
+import { adminPath, CONSOLE_HOME_PATH, SIGN_IN_PATH, TWO_FACTOR_PATH } from "./access";
 
 // The console's data access layer for "who is this?". Every console page and
 // Server Action goes through one of these functions, which verify the session
@@ -26,7 +26,7 @@ export const ROLE_LABEL: Record<StaffRole, string> = {
 };
 
 /** Sign-in page reason shown to an account that is not LuxuryBoma staff. */
-export const NOT_STAFF_PATH = `${SIGN_IN_PATH}?reason=not-staff`;
+export const NOT_STAFF_PATH = `${adminPath(SIGN_IN_PATH)}?reason=not-staff`;
 
 type Client = Awaited<ReturnType<typeof createClient>>;
 
@@ -58,8 +58,8 @@ async function verifiedClaims(supabase: Client) {
 export async function requireStaff(): Promise<Staff> {
   const supabase = await createClient();
   const claims = await verifiedClaims(supabase);
-  if (!claims) redirect(SIGN_IN_PATH);
-  if (claims.aal !== "aal2") redirect(TWO_FACTOR_PATH);
+  if (!claims) redirect(adminPath(SIGN_IN_PATH));
+  if (claims.aal !== "aal2") redirect(adminPath(TWO_FACTOR_PATH));
 
   const staff = await findLbStaff(supabase, claims.sub);
   if (!staff) redirect(NOT_STAFF_PATH);
@@ -100,9 +100,9 @@ export type TwoFactorStep = { kind: "verify"; factorId: string } | { kind: "enro
 export async function getTwoFactorStep(): Promise<TwoFactorStep> {
   const supabase = await createClient();
   const claims = await verifiedClaims(supabase);
-  if (!claims) redirect(SIGN_IN_PATH);
+  if (!claims) redirect(adminPath(SIGN_IN_PATH));
   if (!(await findLbStaff(supabase, claims.sub))) redirect(NOT_STAFF_PATH);
-  if (claims.aal === "aal2") redirect(CONSOLE_HOME_PATH);
+  if (claims.aal === "aal2") redirect(adminPath(CONSOLE_HOME_PATH));
 
   const { data, error } = await supabase.auth.mfa.listFactors();
   if (error) throw new Error(`Could not read two-factor settings: ${error.message}`);
@@ -119,7 +119,7 @@ export async function getTwoFactorStep(): Promise<TwoFactorStep> {
 export async function requireStaffAnyLevel() {
   const supabase = await createClient();
   const claims = await verifiedClaims(supabase);
-  if (!claims) redirect(SIGN_IN_PATH);
+  if (!claims) redirect(adminPath(SIGN_IN_PATH));
   if (!(await findLbStaff(supabase, claims.sub))) redirect(NOT_STAFF_PATH);
   return { supabase, userId: claims.sub, level: claims.aal };
 }

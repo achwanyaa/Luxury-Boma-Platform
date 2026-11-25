@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/console/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -14,7 +15,7 @@ export default function ConsoleLayout({ children }: LayoutProps<"/console">) {
     <div className="flex flex-1 flex-col bg-page text-ink">
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex min-h-14 w-full max-w-[1180px] flex-wrap items-center gap-x-4 gap-y-1 px-4 py-1.5">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href={adminPath("/")} className="flex items-center gap-2">
             <span className="font-lb text-lg font-extrabold tracking-tight text-lb-deep">LuxuryBoma</span>
             <span className="rounded-chip bg-lb-tint px-2 py-0.5 font-lb text-xs font-bold text-lb">console</span>
           </Link>
@@ -35,7 +36,7 @@ async function StaffNav() {
   return (
     <>
       <nav className="flex items-center gap-1">
-        <Link href="/properties" className="flex min-h-11 items-center px-2 font-semibold text-body hover:text-lb">
+        <Link href={adminPath("/properties")} className="flex min-h-11 items-center px-2 font-semibold text-body hover:text-lb">
           Properties
         </Link>
       </nav>

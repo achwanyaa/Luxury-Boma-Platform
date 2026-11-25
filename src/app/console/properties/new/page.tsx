@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/console/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -14,7 +15,7 @@ export default function NewPropertyPage() {
   return (
     <main className={`${ui.wideMain} max-w-[820px]!`}>
       <div className="flex flex-col gap-1">
-        <Link href="/properties" className="text-sm font-semibold text-lb hover:text-lb-deep">
+        <Link href={adminPath("/properties")} className="text-sm font-semibold text-lb hover:text-lb-deep">
           ← Properties
         </Link>
         <h1 className={ui.h1}>New property</h1>

@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/console/access";
 import Link from "next/link";
 import { Suspense } from "react";
 import { countByStatus } from "@/lib/console/properties";
@@ -32,10 +33,10 @@ async function StaffHome() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className={ui.h2}>Properties</h2>
           <div className="flex gap-2">
-            <Link href="/properties" className={`${ui.secondaryButton} flex items-center`}>
+            <Link href={adminPath("/properties")} className={`${ui.secondaryButton} flex items-center`}>
               See all
             </Link>
-            <Link href="/properties/new" className={`${ui.button} flex items-center`}>
+            <Link href={adminPath("/properties/new")} className={`${ui.button} flex items-center`}>
               New property
             </Link>
           </div>

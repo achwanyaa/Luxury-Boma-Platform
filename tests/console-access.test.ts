@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { consoleRedirect, sessionLevel } from "../src/lib/console/access";
+import { adminPath, consolePathFor, consoleRedirect, LOGIN_ALIASES, sessionLevel } from "../src/lib/console/access";
 
 describe("console access (proxy redirect)", () => {
   it("reads the assurance level from the token claims", () => {
@@ -31,5 +31,32 @@ describe("console access (proxy redirect)", () => {
     // Not bounced away from sign-in: a non-staff account is sent there and
     // must be able to sign out, so the proxy never loops.
     expect(consoleRedirect("/sign-in", "aal2")).toBe(null);
+  });
+});
+
+describe("console addresses under /admin", () => {
+  it("puts every console page under /admin", () => {
+    expect(adminPath("/")).toBe("/admin");
+    expect(adminPath("/sign-in")).toBe("/admin/sign-in");
+    expect(adminPath("/properties/abc")).toBe("/admin/properties/abc");
+  });
+
+  it("recognises console addresses and nothing else", () => {
+    expect(consolePathFor("/admin")).toBe("/");
+    expect(consolePathFor("/admin/")).toBe("/");
+    expect(consolePathFor("/admin/properties/new")).toBe("/properties/new");
+    expect(consolePathFor("/administration")).toBe(null);
+    expect(consolePathFor("/properties")).toBe(null);
+    expect(consolePathFor("/")).toBe(null);
+  });
+
+  it("round-trips, so the proxy and the links agree", () => {
+    for (const path of ["/", "/sign-in", "/two-factor", "/properties", "/documents/x"]) {
+      expect(consolePathFor(adminPath(path))).toBe(path);
+    }
+  });
+
+  it("takes /login to sign-in", () => {
+    expect(LOGIN_ALIASES).toContain("/login");
   });
 });

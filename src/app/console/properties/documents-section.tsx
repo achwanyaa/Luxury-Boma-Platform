@@ -1,5 +1,6 @@
 "use client";
 
+import { adminPath } from "@/lib/console/access";
 import { useRef, useState, useTransition } from "react";
 import {
   citation,
@@ -220,7 +221,7 @@ function DocumentRow({ propertyId, doc }: { propertyId: string; doc: DocumentVie
           </span>
         </div>
         <div className="flex flex-wrap gap-1.5">
-          <a href={`/documents/${doc.id}`} target="_blank" rel="noopener noreferrer" className={`${ui.secondaryButton} flex items-center`}>
+          <a href={adminPath(`/documents/${doc.id}`)} target="_blank" rel="noopener noreferrer" className={`${ui.secondaryButton} flex items-center`}>
             Open ↗
           </a>
           <button type="button" onClick={() => setEditing((e) => !e)} className={ui.secondaryButton}>

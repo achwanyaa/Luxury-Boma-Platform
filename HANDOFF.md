@@ -24,9 +24,9 @@ Last updated 23 Nov 2026:
 | GitHub | `https://github.com/achwanyaa/Luxury-Boma-Platform` (renamed from `Realogic` in Nov 2026; the old address redirects), branch `main`. Everything up to the console build plan is committed and pushed. Tete may switch the repo to private; until then treat it as public. |
 | Local folder | `C:\Users\sajim\Desktop\Realogic` (Windows, PowerShell). |
 | Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **7 migrations are applied**: the first 4 on 11 Nov 2026, then on 25 Nov 2026 the video media kind, the public `property-media` bucket (photos and video, staff-only writes) and the private `property-documents` bucket (staff-only, read through 5-minute signed links). The API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor run 18 Nov 2026: 0 errors, 6 warnings still to review. The first admin exists: Tete's auth user has an `lb_admin` staff row (email marked confirmed through the admin API on 18 Nov 2026). Phone sign-in is off, email sign-in is on. |
-| Console | Staff sign-in with two-factor is built (milestone 2, step 1). Local: `http://console.localhost:3000/sign-in`. Not reachable on Vercel yet: no console host is mapped (`CONSOLE_DOMAINS` in `src/lib/sites.ts`). |
+| Console | Built (milestone 2). Reachable at **/admin** on every host, and /login goes to its sign-in page: live at **https://realogic-mu.vercel.app/admin** and **/login**; locally at http://realogic.localhost:3000/admin. The old console host names (console.localhost, console.luxuryboma.com) forward to /admin. Pages and actions check the session themselves, and the database refuses staff data without two-factor. |
 | Local env | Keys are in `.env` (git-ignored). `.env.example` is the blank template. |
-| Tests | `npm test`: 153 pass in 11 files (data walls, storage policies, console rules for properties, listings, facts, media, documents and publishing, portal wording). Lint, typecheck and build pass on the Windows machine (25 Nov 2026). `typecheck` runs `next typegen` first so `PageProps`/`LayoutProps` exist on a fresh clone. |
+| Tests | `npm test`: 157 pass in 11 files (data walls, storage policies, console rules for properties, listings, facts, media, documents and publishing, portal wording). Lint, typecheck and build pass on the Windows machine (25 Nov 2026). `typecheck` runs `next typegen` first so `PageProps`/`LayoutProps` exist on a fresh clone. |
 | Vercel | Project `realogic` under `achwanyaas-projects` (created 11 Nov 2026; the older `reallogic-demo` is the prototype, not this repo). Local folder is linked (`.vercel/`, git-ignored). The four env vars are set for Production and Preview; `SUPABASE_SECRET_KEY` is Sensitive. Connected to GitHub: every push to `main` deploys to production at **https://realogic-mu.vercel.app** (first good deploy 12 Nov 2026). The other `*-achwanyaas-projects.vercel.app` aliases sit behind Vercel login. `vercel.json` pins the framework to Next.js (the CLI-created project defaulted to "Other"). Deploy through Git, not `vercel deploy` from this folder: the CLI does not read `.gitignore` and can upload `.env` with the source. |
 
 ### Progress log
@@ -68,9 +68,9 @@ All of it is checked by tests, and the two buckets were checked live with throwa
 
 The console build now follows `PLAN-CONSOLE.md` (25 Nov 2026): it sets the step order, adds the video walkthrough and storage buckets, and ends with the Rafiki godown going live. Read it before item 2 below.
 
-1. Tete signs in at `http://console.localhost:3000/sign-in` and sets up the authenticator app. Report anything that breaks.
+1. Tete signs in at https://realogic-mu.vercel.app/login (or locally /login) and sets up the authenticator app, then enters Rafiki (PLAN-CONSOLE.md step 9). Report anything that breaks.
 2. Milestone 2 steps 2 to 7 (section 9): properties list and create/edit with a publish button that says why it is blocked, the facts editor, documents (private storage bucket, new migration), media, listing, catalogue screens.
-3. Operational items: review the 6 security advisor warnings (needs a screenshot of the Warnings tab or the dashboard, since the advisor has no CLI command), and choose a console address on Vercel (section 15).
+3. Operational items: review the 6 security advisor warnings (needs a screenshot of the Warnings tab or the dashboard, since the advisor has no CLI command).
 4. Milestones 3 to 6 (section 10), and the open questions for Tete (section 13).
 
 ## 3. Run and check
@@ -89,7 +89,7 @@ Local addresses (the `*.localhost` names resolve in Chrome and Edge without setu
 | Address | Shows |
 | --- | --- |
 | `http://realogic.localhost:3000` | Realogic portal |
-| `http://console.localhost:3000` | LuxuryBoma console |
+| `http://realogic.localhost:3000/admin` (or `/login`) | LuxuryBoma console (`console.localhost` forwards here) |
 | `http://luxuryboma.localhost:3000` | luxuryboma.com |
 | `http://localhost:3000` | whatever `DEFAULT_SITE` names (`realogic`, `console` or `luxuryboma`) |
 
@@ -149,10 +149,10 @@ tests/data-walls.test.ts          The wall and independence-rule tests
 tests/seed.test.ts                Seed loads on top of migrations
 ```
 
-**How routing works.** `src/proxy.ts` looks at the Host header and rewrites the path:
+**How routing works.** `src/proxy.ts` first sends `/admin/...` on any host to `/console/...` (the console), and `/login` to `/admin/sign-in`. Console links are written with `adminPath()` from `src/lib/console/access.ts`. `/login` is taken by staff sign-in, so buyer sign-in (milestone 5) needs another address, such as `/account`. Otherwise it looks at the Host header and rewrites the path:
 
 - a client's domain or `<slug>.localhost` -> `/sites/<slug>/...`
-- `console.luxuryboma.com` or `console.localhost` -> `/console/...`
+- `console.luxuryboma.com` or `console.localhost` -> redirect to `/admin`
 - `luxuryboma.com` or `luxuryboma.localhost` -> `/lb/...`
 - anything else -> `DEFAULT_SITE`
 
@@ -336,7 +336,6 @@ The prototype is the design source of truth, but it lives in claude.ai artifacts
 - Whether "required to publish" stays as the architect's five facts (clear height, slab load, yard turning, mezzanine capacity, incoming power). The catalogue marks those five now; nothing enforces it yet.
 - Real data for Godown A1: architect's drawings, site measurements, photos, Realsee link.
 - From the advocate: whether leaving out the shared ownership is acceptable (rule 5; Tete chose to leave it out on 25 Nov 2026), privacy notice and terms, licence agreement, Sketch3D's permission to show drawings, whether LuxuryBoma must register with the Office of the Data Protection Commissioner.
-- Which console address to use on Vercel: `console.luxuryboma.com` or a Vercel alias (section 15). (The database password is no longer needed, and the Vercel project sits under `achwanyaas-projects`.)
 
 ## 14. Working rules for this repo
 
@@ -350,6 +349,5 @@ The prototype is the design source of truth, but it lives in claude.ai artifacts
 ## 15. Later
 
 - **Recovery codes for two-factor.** Supabase has them in auth-js 2.119 but marks them experimental. Until then, a lost phone means an admin deletes the factor in the Supabase dashboard (Authentication > Users > the user > MFA factors) and the staff member sets up again.
-- **A console address on Vercel.** Either `console.luxuryboma.com` once the domain is ready, or a Vercel alias added to `CONSOLE_DOMAINS`.
 - **Security advisor warnings** (6 on 18 Nov 2026): review and fix or record why they stay.
 - **The portal "feels like it's missing something"** (Tete, 18 Nov 2026). Ask what, after the staff side.

@@ -5,6 +5,14 @@
 // session and the staff row again (src/lib/console/staff.ts), and the
 // database refuses staff data to any session without two-factor.
 
+// The console lives under /admin on every site (the Realogic portal, Vercel
+// addresses, localhost), so it works wherever the app is deployed. Inside the
+// app its pages are in src/app/console; the paths below are relative to /admin.
+export const ADMIN_BASE = "/admin";
+
+/** Short addresses that lead to the staff sign-in page. */
+export const LOGIN_ALIASES = ["/login"];
+
 export const SIGN_IN_PATH = "/sign-in";
 export const TWO_FACTOR_PATH = "/two-factor";
 export const CONSOLE_HOME_PATH = "/";
@@ -23,5 +31,17 @@ export function consoleRedirect(pathname: string, level: SessionLevel): string |
   if (level === null) return SIGN_IN_PATH;
   if (pathname === TWO_FACTOR_PATH) return null;
   if (level !== "aal2") return TWO_FACTOR_PATH;
+  return null;
+}
+
+/** The address of a console page: "/properties" -> "/admin/properties", "/" -> "/admin". */
+export function adminPath(path: string): string {
+  return path === "/" ? ADMIN_BASE : `${ADMIN_BASE}${path}`;
+}
+
+/** The console page an address points at ("/admin/properties" -> "/properties"), or null outside the console. */
+export function consolePathFor(pathname: string): string | null {
+  if (pathname === ADMIN_BASE || pathname === `${ADMIN_BASE}/`) return "/";
+  if (pathname.startsWith(`${ADMIN_BASE}/`)) return pathname.slice(ADMIN_BASE.length);
   return null;
 }

@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/console/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -29,7 +30,7 @@ const dateText = (iso: string | null) =>
 export default function PropertyPage({ params }: PageProps<"/console/properties/[id]">) {
   return (
     <main className={ui.wideMain}>
-      <Link href="/properties" className="text-sm font-semibold text-lb hover:text-lb-deep">
+      <Link href={adminPath("/properties")} className="text-sm font-semibold text-lb hover:text-lb-deep">
         ← Properties
       </Link>
       <Suspense fallback={<p className={ui.lead}>Loading…</p>}>

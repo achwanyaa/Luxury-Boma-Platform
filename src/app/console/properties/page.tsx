@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/console/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -16,7 +17,7 @@ export default function PropertiesPage() {
     <main className={ui.wideMain}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className={ui.h1}>Properties</h1>
-        <Link href="/properties/new" className={`${ui.button} flex items-center`}>
+        <Link href={adminPath("/properties/new")} className={`${ui.button} flex items-center`}>
           New property
         </Link>
       </div>
@@ -35,7 +36,7 @@ async function PropertyList() {
     return (
       <section className={`${ui.card} flex flex-col items-start gap-3`}>
         <p className="text-body">No properties yet.</p>
-        <Link href="/properties/new" className={`${ui.button} flex items-center`}>
+        <Link href={adminPath("/properties/new")} className={`${ui.button} flex items-center`}>
           Add the first property
         </Link>
       </section>
@@ -57,7 +58,7 @@ async function PropertyList() {
       {properties.map((p) => (
         <li key={p.id} className="border-b border-line-soft last:border-b-0">
           <Link
-            href={`/properties/${p.id}`}
+            href={adminPath(`/properties/${p.id}`)}
             className="grid gap-1 px-5 py-3.5 hover:bg-lb-tint/40 md:grid-cols-[140px_minmax(0,1fr)_160px_120px_130px] md:items-center md:gap-4"
           >
             <span className="text-sm font-semibold text-muted tabular-nums">{p.reference}</span>
