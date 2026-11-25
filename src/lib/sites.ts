@@ -17,7 +17,6 @@ export type Site = {
   whatsapp: string;
   email: string;
   postalAddress: string;
-  designedBy: string;
   /** Production domains that serve this portal. */
   domains: string[];
 };
@@ -32,13 +31,12 @@ export const SITES: Record<string, Site> = {
     wordmarkSub: "PROPERTIES",
     legalName: "Realogic Properties Limited",
     tagline:
-      "Providing property solutions in building maintenance, plumbing, electrical and landscaping work. Godowns designed by Sketch3D Ltd.",
+      "Godowns to let and for sale, plus building maintenance, plumbing, electrical and landscaping work.",
     phone: "+254 725 073 496",
     phoneHref: "tel:+254725073496",
     whatsapp: "254725073496",
     email: "realogicacc@gmail.com",
     postalAddress: "P.O. Box 249-00100, Nairobi",
-    designedBy: "Sketch3D Ltd",
     domains: [], // Realogic's domain is still to be confirmed.
   },
 };
@@ -47,8 +45,8 @@ export const LUXURYBOMA_DOMAINS = ["luxuryboma.com", "www.luxuryboma.com"];
 export const CONSOLE_DOMAINS = ["console.luxuryboma.com"];
 
 export const DISCLOSURE = {
-  short: "Realogic and LuxuryBoma share an owner. LuxuryBoma checks every client the same way.",
-  full: "Designed by Sketch3D · developed and listed by Realogic · verified by LuxuryBoma. Realogic and LuxuryBoma share an owner.",
+  short: "Realogic and LuxuryBoma share an owner. LuxuryBoma checks every listing the same way.",
+  full: "Listed by Realogic · verified by LuxuryBoma. Realogic and LuxuryBoma share an owner.",
 };
 
 export function getSite(slug: string): Site | undefined {

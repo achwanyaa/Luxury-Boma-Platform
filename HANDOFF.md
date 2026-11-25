@@ -149,7 +149,7 @@ Visitors never see `/sites/...`; asking for it directly returns 404 because the 
 2. Realogic edits only price, availability and description on a listing.
 3. Every "From drawings" fact names its drawing and author, for example "Drawing A-101 rev C, Sketch3D Ltd (developer's architect)".
 4. A property goes live only after a LuxuryBoma site visit, and only a reviewer or admin publishes (an editor cannot publish their own work).
-5. Disclosure appears wherever verification is claimed: "Designed by Sketch3D · developed and listed by Realogic · verified by LuxuryBoma. Realogic and LuxuryBoma share an owner." (constants in `src/lib/sites.ts`).
+5. Disclosure appears wherever verification is claimed: "Listed by Realogic · verified by LuxuryBoma. Realogic and LuxuryBoma share an owner." (constants in `src/lib/sites.ts`). Tete decided on 25 Nov 2026 that the public site names only Realogic and LuxuryBoma: not Sketch3D, and not who owns each godown. The shared-owner sentence must stay. Rule 3 is unchanged: a "From drawings" fact still names its drawing and author in its source.
 6. In v1, LuxuryBoma enters all listing data.
 7. While Tete is the only staff member, editor and reviewer are the same person. Facts where `reviewed_by = checked_by` must be shown as "self-reviewed" so the verification page never overstates the checking.
 

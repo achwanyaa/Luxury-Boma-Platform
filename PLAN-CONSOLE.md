@@ -150,7 +150,7 @@ The server re-runs the check before setting live. The update only applies if the
 
 Do not change these without Tete's answer; raise them when step 6 is reached.
 
-1. **Ownership wording.** Sketch3D designed and built the park, but another party owns it. The home page says "The developer, not an agent." and `DISCLOSURE` in `src/lib/sites.ts` says "developed and listed by Realogic". Neither is accurate for this godown. Tete needs to confirm the owner's name and the wording (the advocate is already reviewing the disclosure).
+1. **Ownership wording.** Settled 25 Nov 2026: the public site says only "Listed by Realogic · verified by LuxuryBoma. Realogic and LuxuryBoma share an owner." It does not name Sketch3D or the owner. The front page no longer claims Realogic builds or owns every godown. Still for Tete's advocate: the owner's permission to list Rafiki and show its photos and tour, and whether letting or selling for another owner needs estate agent registration.
 2. **Unit number** Realogic uses for this godown.
 3. **Site visit date** to record (the day the panos were captured).
 4. **Lease, sale or both**, and the price or "price on request".

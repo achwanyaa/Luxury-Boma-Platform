@@ -11,16 +11,16 @@ import { DISCLOSURE, getSite } from "@/lib/sites";
 
 const WHAT_WE_DO = [
   {
-    title: "We build",
-    text: "Our parent company, Sketch3D Ltd, designs each godown, and we build it. The architect's drawings sit behind the numbers you see here.",
-  },
-  {
     title: "We lease and sell",
-    text: "We own the godowns we list, so you lease or buy directly from the developer.",
+    text: "Godowns to let and for sale, with the key facts checked by LuxuryBoma before they are listed.",
   },
   {
-    title: "We fit out and maintain",
-    text: "Offices, partitions, power upgrades, plumbing, roofing and grounds, done by the people who built the space.",
+    title: "We fit out",
+    text: "Offices, partitions, extra loading doors and floor finishes, quoted and done for you.",
+  },
+  {
+    title: "We maintain",
+    text: "Building maintenance, plumbing, electrical and grounds work after you move in.",
   },
 ];
 
@@ -39,8 +39,7 @@ const STEPS = [
 ];
 
 const CHAIN = [
-  { who: "Sketch3D Ltd", does: "designs" },
-  { who: "Realogic", does: "builds, lists, leases and sells" },
+  { who: "Realogic", does: "lists, leases and sells" },
   { who: "LuxuryBoma", does: "checks the facts", lb: true },
 ];
 
@@ -73,7 +72,7 @@ export default async function PortalHome({ params }: PageProps<"/sites/[site]">)
               Industrial space you can judge before you visit.
             </h1>
             <p className="max-w-[560px] text-[17px] leading-[27px] text-muted">
-              {site.name} builds, leases and sells godowns, and fits them out for you. Every key fact on our
+              {site.name} leases and sells godowns, and fits them out for you. Every key fact on our
               listings is labelled measured, from drawings or declared, and checked independently by LuxuryBoma.
             </p>
 
@@ -128,7 +127,7 @@ export default async function PortalHome({ params }: PageProps<"/sites/[site]">)
 
       {/* Who does what: the chain behind every listing. */}
       <section className="border-b border-line bg-white">
-        <ol className="mx-auto grid max-w-[1180px] grid-cols-1 sm:grid-cols-3">
+        <ol className="mx-auto grid max-w-[1180px] grid-cols-1 sm:grid-cols-2">
           {CHAIN.map((link, i) => (
             <li
               key={link.who}
@@ -208,12 +207,11 @@ export default async function PortalHome({ params }: PageProps<"/sites/[site]">)
               Who we are
             </span>
             <h2 className="text-[28px] leading-[34px] font-extrabold text-navy">
-              The developer, not an agent.
+              Godowns, checked before they are listed.
             </h2>
             <p className="leading-[26px] text-body">
-              {site.legalName} is part of Sketch3D Ltd, a Kenyan architectural firm. Sketch3D designs our godowns;
-              we build them, own them, and lease or sell them ourselves. When you ask us a question about a
-              building, you&apos;re asking the people who put it up.
+              {site.legalName} leases and sells industrial godowns, and fits out and maintains them for the
+              businesses that use them. LuxuryBoma checks the facts on every listing before it goes up.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -279,7 +277,7 @@ export default async function PortalHome({ params }: PageProps<"/sites/[site]">)
       <section className="mx-auto flex max-w-[1180px] flex-col gap-4 px-5 pt-10 pb-12">
         <h2 className="text-[26px] leading-[32px] font-extrabold text-navy">After you move in</h2>
         <p className="max-w-[680px] leading-[25px] text-muted">
-          We fit out and maintain the space too, so changes you need can be quoted and done by the people who built it.
+          We fit out and maintain the space too, so the changes you need are quoted and done by one team.
         </p>
         <div className="flex flex-wrap gap-3">
           {SERVICES.map((service) => (
