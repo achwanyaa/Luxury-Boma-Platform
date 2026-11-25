@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getProperty } from "@/lib/console/properties";
+import { getProperty, getPublishInput } from "@/lib/console/properties";
+import { moveEffect, moveLabel, publishCheck, STATUS_MOVES } from "@/lib/console/publish-rules";
 import { DEALS, listingToInput } from "@/lib/console/listing-form";
 import { MEDIA_BUCKET } from "@/lib/console/media-rules";
 import { propertyToInput } from "@/lib/console/property-form";
 import { publicFileUrl } from "@/lib/supabase/public";
 import { requireStaff } from "@/lib/console/staff";
 import { ui } from "../../ui";
-import { saveListing, updateProperty } from "../actions";
+import { changeStatus, saveListing, updateProperty } from "../actions";
+import { StatusPanel } from "../status-panel";
 import { FactsSection } from "../facts-section";
 import { ListingForm } from "../listing-form";
 import { MediaSection } from "../media-section";
@@ -22,7 +24,7 @@ const dateText = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Not yet";
 
 // Sections added by the next console steps (PLAN-CONSOLE.md 2 to 7).
-const STILL_TO_COME = ["Documents", "Publishing"];
+const STILL_TO_COME = ["Documents: drawings and reports"];
 
 export default function PropertyPage({ params }: PageProps<"/console/properties/[id]">) {
   return (
@@ -44,6 +46,9 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
   if (!property) notFound();
 
   const client = property.clients;
+  const publish = await getPublishInput(property.id, staff.role);
+  const check = publish ? publishCheck(publish.input) : { blockers: [], warnings: [] };
+  const moves = STATUS_MOVES[property.status].map((to) => ({ to, label: moveLabel(property.status, to), effect: moveEffect(to) }));
   const fileUrl = (m: { file_path: string | null; url: string | null }) =>
     m.file_path ? publicFileUrl(MEDIA_BUCKET, m.file_path) : (m.url ?? "");
   const photos = property.media
@@ -111,18 +116,21 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
             />
           </section>
         </div>
-        <aside className={`${ui.card} flex flex-col gap-3`}>
-          <h2 className={ui.h2}>Still to add here</h2>
-          <ul className="flex flex-col gap-1.5 text-sm text-body">
-            {STILL_TO_COME.map((item) => (
-              <li key={item} className="flex gap-2">
-                <span aria-hidden="true" className="text-muted">○</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-          <p className="text-sm text-muted">These screens come in the next console steps.</p>
-        </aside>
+        <div className="flex flex-col gap-4 max-lg:order-first lg:sticky lg:top-4">
+          <StatusPanel status={property.status} moves={moves} check={check} change={changeStatus.bind(null, property.id)} />
+          <aside className={`${ui.card} flex flex-col gap-3`}>
+            <h2 className={ui.h2}>Still to add here</h2>
+            <ul className="flex flex-col gap-1.5 text-sm text-body">
+              {STILL_TO_COME.map((item) => (
+                <li key={item} className="flex gap-2">
+                  <span aria-hidden="true" className="text-muted">○</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm text-muted">These screens come in the next console steps.</p>
+          </aside>
+        </div>
       </div>
     </>
   );

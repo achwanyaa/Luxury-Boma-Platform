@@ -99,6 +99,19 @@ Checked in the browser at desktop and phone width with the samples. A temporary 
 
 ### 6. Status and publish
 
+**Done 25 Nov 2026.** A Status panel on the property page shows the status and the moves allowed from it:
+- draft → in review;
+- in review → live or back to draft;
+- live → paused or sold/leased;
+- paused → live or sold/leased;
+- sold/leased → draft.
+
+Each move asks for confirmation with what it does. Before publishing, a checklist lists every blocker and warning:
+- Blockers: not a reviewer or admin; no site visit date; no active listing; no main photo; a drawings fact without its drawing.
+- Warnings: required facts not yet checked; no fact with a value.
+
+The server re-runs the check before setting live. The update only applies if the status hasn't changed meanwhile. The portal cache is refreshed. Rules are in `src/lib/console/publish-rules.ts` (tested); `getPublishInput` is in `src/lib/console/properties.ts`; `changeStatus` is in actions. Not checked by hand yet (needs a signed-in reviewer or admin). **Before publishing Rafiki**, settle the ownership wording below.
+
 - Status panel on the property hub: current status and the allowed moves (draft → in review → live → paused / sold or leased, and back to draft from in review).
 - The publish button is always visible. When blocked it is disabled and lists every reason, from a pure, tested function:
   - no site visit date;

@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { PropertyStatus } from "./property-form";
+import type { PublishInput } from "./publish-rules";
 
 // Console reads of properties. They run as the signed-in staff member, so
 // row-level security applies: without a two-factor staff session these
@@ -64,3 +65,34 @@ export async function countByStatus(): Promise<Record<PropertyStatus, number>> {
   for (const row of data) counts[row.status] += 1;
   return counts;
 }
+
+/** Everything the publish check needs, read as the signed-in staff member. */
+export async function getPublishInput(propertyId: string, role: string) {
+  const supabase = await createClient();
+  const { data: property } = await supabase
+    .from("properties")
+    .select("id, status, site_visited_on, property_type, clients ( slug ), listings ( status ), media ( kind, is_main )")
+    .eq("id", propertyId)
+    .maybeSingle();
+  if (!property) return null;
+  const [{ data: defs }, { data: values }] = await Promise.all([
+    supabase.from("spec_definitions").select("key, name, required_to_publish").eq("property_type", property.property_type),
+    supabase.from("spec_values").select("spec_key, label, source").eq("property_id", propertyId).is("space_id", null),
+  ]);
+  const byKey = new Map((values ?? []).map((v) => [v.spec_key, v]));
+  const input: PublishInput = {
+    role,
+    siteVisitedOn: property.site_visited_on,
+    listings: property.listings,
+    media: property.media,
+    facts: (defs ?? []).map((d) => ({
+      key: d.key,
+      name: d.name,
+      label: byKey.get(d.key)?.label ?? null,
+      source: byKey.get(d.key)?.source ?? null,
+      requiredToPublish: d.required_to_publish,
+    })),
+  };
+  return { property, input };
+}
+

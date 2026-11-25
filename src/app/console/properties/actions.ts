@@ -1,14 +1,18 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { refresh, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   describeSaveError,
   readPropertyForm,
   validateProperty,
+  STATUS_LABEL,
   type FieldErrors,
   type PropertyInput,
+  type PropertyStatus,
 } from "@/lib/console/property-form";
+import { getPublishInput } from "@/lib/console/properties";
+import { canMove, describeStatusError, publishCheck } from "@/lib/console/publish-rules";
 import {
   DEALS,
   describeListingError,
@@ -213,4 +217,40 @@ export async function markFactReviewed(propertyId: string, factId: string): Prom
   const slug = data.properties?.clients?.slug;
   if (slug) revalidateTag(listingsTag(slug), "max");
   return { ok: true, message: "Marked reviewed." };
+}
+
+// ---------------------------------------------------------------------------
+// Status: draft -> in review -> live -> paused / sold or leased
+// ---------------------------------------------------------------------------
+
+export type StatusResult = { ok: boolean; message: string; blockers?: string[] };
+
+export async function changeStatus(propertyId: string, to: PropertyStatus): Promise<StatusResult> {
+  const staff = await requireStaff();
+  const supabase = await createClient();
+  const loaded = await getPublishInput(propertyId, staff.role);
+  if (!loaded) return { ok: false, message: "This property no longer exists, or your account can't change it." };
+  const { property, input } = loaded;
+
+  if (!canMove(property.status, to)) {
+    return { ok: false, message: `A ${STATUS_LABEL[property.status].toLowerCase()} property can't go straight to ${STATUS_LABEL[to].toLowerCase()}.` };
+  }
+  if (to === "live") {
+    const { blockers } = publishCheck(input);
+    if (blockers.length > 0) return { ok: false, message: "Not published yet:", blockers };
+  }
+
+  const { data: changed, error } = await supabase
+    .from("properties")
+    .update({ status: to })
+    .eq("id", property.id)
+    .eq("status", property.status)
+    .select("id")
+    .maybeSingle();
+  if (error) return { ok: false, message: describeStatusError(error) };
+  if (!changed) return { ok: false, message: "The status changed while you were looking. Reload the page and try again." };
+
+  if (property.clients?.slug) revalidateTag(listingsTag(property.clients.slug), "max");
+  refresh();
+  return { ok: true, message: to === "live" ? "Published. It is on the portal now." : `Now ${STATUS_LABEL[to].toLowerCase()}.` };
 }
