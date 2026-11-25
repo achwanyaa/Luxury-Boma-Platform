@@ -17,19 +17,48 @@ One Next.js app and one Supabase database that serve many clients. The first cli
 
 ## 2. Current state
 
-Verified on 11 Nov 2026:
+Last updated 23 Nov 2026:
 
 | Thing | State |
 | --- | --- |
-| GitHub | `https://github.com/achwanyaa/Realogic`, branch `main`, one commit (foundation). This handoff and `CLAUDE.md` were added after that commit and may still need committing. |
+| GitHub | `https://github.com/achwanyaa/Realogic`, branch `main`. Everything up to the console sign-in is committed and pushed. Tete may switch the repo to private; until then treat it as public. |
 | Local folder | `C:\Users\sajim\Desktop\Realogic` (Windows, PowerShell). |
-| Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **The 4 migrations are applied** (11 Nov 2026) and the API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor run 18 Nov 2026: 0 errors, 6 warnings still to review. The first admin exists: Tete's auth user has an `lb_admin` staff row (its email address was not yet confirmed on 18 Nov, which blocks password sign-in). Phone sign-in is off, email sign-in is on. |
+| Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **The 4 migrations are applied** (11 Nov 2026) and the API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor run 18 Nov 2026: 0 errors, 6 warnings still to review. The first admin exists: Tete's auth user has an `lb_admin` staff row (email marked confirmed through the admin API on 18 Nov 2026). Phone sign-in is off, email sign-in is on. |
 | Console | Staff sign-in with two-factor is built (milestone 2, step 1). Local: `http://console.localhost:3000/sign-in`. Not reachable on Vercel yet: no console host is mapped (`CONSOLE_DOMAINS` in `src/lib/sites.ts`). |
 | Local env | Keys are in `.env` (git-ignored). `.env.example` is the blank template. |
-| Tests | `npm test`: 61 pass. Lint, typecheck and build pass on the Windows machine (11 Nov 2026). `typecheck` runs `next typegen` first so `PageProps`/`LayoutProps` exist on a fresh clone. |
+| Tests | `npm test`: 74 pass (61 data-wall and seed tests, 4 console redirect tests, 9 listing filter and wording tests). Lint, typecheck and build pass on the Windows machine (18 Nov 2026). `typecheck` runs `next typegen` first so `PageProps`/`LayoutProps` exist on a fresh clone. |
 | Vercel | Project `realogic` under `achwanyaas-projects` (created 11 Nov 2026; the older `reallogic-demo` is the prototype, not this repo). Local folder is linked (`.vercel/`, git-ignored). The four env vars are set for Production and Preview; `SUPABASE_SECRET_KEY` is Sensitive. Connected to GitHub: every push to `main` deploys to production at **https://realogic-mu.vercel.app** (first good deploy 12 Nov 2026). The other `*-achwanyaas-projects.vercel.app` aliases sit behind Vercel login. `vercel.json` pins the framework to Next.js (the CLI-created project defaulted to "Other"). Deploy through Git, not `vercel deploy` from this folder: the CLI does not read `.gitignore` and can upload `.env` with the source. |
 
-Milestone 1 (Foundation) is code-complete. What remains of it is operational (section 8).
+### Progress log
+
+**Milestone 1, Foundation: done** (11 to 12 Nov 2026). How:
+
+- Migrations applied with `npx supabase db push --remote` from the linked folder (no database password needed with the current CLI). The seed was not run.
+- The real Realogic `clients` row was inserted by SQL, then checked through the API.
+- Types generated with `npx supabase gen types typescript --linked`, then passed as `Database` to the browser, server and session clients.
+- Vercel project `realogic` created with the CLI, env vars added with `vercel env add`, GitHub connected by Tete in the Vercel dashboard. `vercel.json` added because the project defaulted to "Other" and the first deploy failed.
+- `typecheck` now runs `next typegen` first, because a fresh clone has no `PageProps` types.
+
+**Milestone 2, Console: step 1 of 7 done** (18 Nov 2026). Staff sign-in with two-factor. How:
+
+- The first `lb_admin` staff row was inserted by SQL for Tete's auth user, and the email was marked confirmed with the auth admin API (`PUT /auth/v1/admin/users/{id}` with `email_confirm: true`, secret key in the `apikey` header).
+- The flow is: email and password, then an authenticator app (QR code on the first visit, a 6-digit code after that), then the console home. Checked locally against the live project: redirects, the sign-in page and the wrong-password message. Tete still has to run the full sign-in with the authenticator app, because it needs the password and phone.
+
+**Portal front page and listings: first pass** (25 Nov 2026, ahead of milestone 4 at Tete's request). How:
+
+- Design follows a survey of listing sites (LoopNet, Crexi, Prologis, SEGRO, JLL, BuyRentKenya, Property24 Kenya, Knight Frank Kenya, Rightmove Commercial): search-first hero with a To let / For sale toggle, one-tap area chips, "N godowns" count wording, cards with deal badges, price, the four key numbers (floor area with sq ft, clear height, loading doors, power), and WhatsApp on every card.
+- Home (`/`): who Realogic is and what it does, the Sketch3D → Realogic → LuxuryBoma chain, newest three godowns, how facts are checked, services, WhatsApp/call band. Listings (`/properties`): filters in the address bar (`deal`, `size`, `location`, `sort`), works without JavaScript. Property page (`/properties/[slug]`): key numbers with provenance pills, all specifications grouped with source and date, WhatsApp/call panel, "Verified by LuxuryBoma" card with the disclosure. It is a lean version of the milestone 4 dossier: no gallery, tour, documents, map, booking or spec sheet yet.
+- Data is read as `anon` with no session (`src/lib/supabase/public.ts`), so row-level security limits it to live properties and active listings. Cached for minutes and tagged `portal-listings:<slug>`: the console's publish action should call `revalidateTag` on it. No migration was needed.
+- The real project has no live property yet, so the live site shows the "first listings are being checked" empty state. For design work, `PORTAL_SAMPLE_LISTINGS=1` in `.env` shows three clearly marked sample godowns (`src/lib/portal/sample.ts`), development builds only.
+- The portal layout now reads `params` inside `<Suspense>` (header and footer), which fixed the instant-navigation warning listed in section 15.
+- Copy avoids promises Realogic hasn't made (reply times, build specs). Check the "Who we are" and "What we do" wording with Tete.
+
+**What remains, in order**
+
+1. Tete signs in at `http://console.localhost:3000/sign-in` and sets up the authenticator app. Report anything that breaks.
+2. Milestone 2 steps 2 to 7 (section 9): properties list and create/edit with a publish button that says why it is blocked, the facts editor, documents (private storage bucket, new migration), media, listing, catalogue screens.
+3. Operational items: review the 6 security advisor warnings (needs a screenshot of the Warnings tab or the dashboard, since the advisor has no CLI command), and choose a console address on Vercel (section 15).
+4. Milestones 3 to 6 (section 10), and the open questions for Tete (section 13).
 
 ## 3. Run and check
 
@@ -79,7 +108,13 @@ src/lib/supabase/session.ts       Session refresh used by the proxy
 src/app/layout.tsx                Root layout, four fonts via next/font
 src/app/globals.css               Design tokens (@theme), .hatch and .blueprint textures
 src/app/sites/[site]/layout.tsx   Client portal shell: contact strip, header, footer
-src/app/sites/[site]/page.tsx     Portal home (static content only so far)
+src/app/sites/[site]/page.tsx     Portal home: who Realogic is, search, featured godowns
+src/app/sites/[site]/properties/  Listings with filters, and the property page ([slug])
+src/lib/portal/listing-model.ts   Pure rules: filters, sorting, price and availability wording (unit-tested)
+src/lib/portal/listings.ts        Cached public reads of live properties and active listings
+src/lib/portal/sample.ts          SAMPLE godowns for local design work only (PORTAL_SAMPLE_LISTINGS=1)
+src/lib/supabase/public.ts        Cookieless anon client for cached public pages
+src/components/portal/            Listing card, filters, provenance bar, photo placeholder, drawing
 src/lib/console/access.ts         Console redirect rule used by the proxy (pure, unit-tested)
 src/lib/console/staff.ts          Console data access layer: requireStaff() and friends (server-only)
 src/app/console/actions.ts        Sign-in, two-factor set-up and check, sign-out (Server Actions)
@@ -180,7 +215,9 @@ Stored in `staff_members.role`: `lb_admin`, `lb_editor`, `lb_reviewer`, `client_
 
 `tests/helpers/db.ts` starts PGlite, creates the roles `anon`, `authenticated`, `service_role`, an `auth.users` table, and `auth.uid()` / `auth.jwt()` that read `request.jwt.claims`, then applies every migration. `as(db, caller, fn)` runs `fn` as that caller (`anon`, or `user(id, { twoFactor })`) inside a transaction that is always rolled back. This proves the policies but is not a live Supabase project: Supabase Storage, Auth flows and realtime are not covered.
 
-## 8. Do first: finish milestone 1
+## 8. Milestone 1 steps (all done; kept for the record)
+
+Every step below is done (see the progress log in section 2). The only follow-up left is reviewing the 6 security advisor warnings in step 2.
 
 1. **Apply the migrations to the Supabase project.** From the repo folder: `npx supabase login`, `npx supabase link --project-ref dlgqgtyiqclyduxkckgi`, `npx supabase db push`. It asks for the database password; ask Tete. If `link` complains about a missing config, run `npx supabase init` first and commit the `supabase/config.toml` it creates. Do not run the seed.
 2. **Check the result.** In the Supabase dashboard run the security advisor and fix anything it reports. Confirm the API sees the tables (`/rest/v1/spec_definitions?select=key` returns the 14 catalogue rows).
@@ -280,7 +317,7 @@ The prototype is the design source of truth, but it lives in claude.ai artifacts
 - Whether "required to publish" stays as the architect's five facts (clear height, slab load, yard turning, mezzanine capacity, incoming power). The catalogue marks those five now; nothing enforces it yet.
 - Real data for Godown A1: architect's drawings, site measurements, photos, Realsee link.
 - From the advocate: ownership disclosure wording, privacy notice and terms, licence agreement, Sketch3D's permission to show drawings, whether LuxuryBoma must register with the Office of the Data Protection Commissioner.
-- The Supabase database password, and which account owns the Vercel project.
+- Which console address to use on Vercel: `console.luxuryboma.com` or a Vercel alias (section 15). (The database password is no longer needed, and the Vercel project sits under `achwanyaas-projects`.)
 
 ## 14. Working rules for this repo
 
@@ -296,5 +333,4 @@ The prototype is the design source of truth, but it lives in claude.ai artifacts
 - **Recovery codes for two-factor.** Supabase has them in auth-js 2.119 but marks them experimental. Until then, a lost phone means an admin deletes the factor in the Supabase dashboard (Authentication > Users > the user > MFA factors) and the staff member sets up again.
 - **A console address on Vercel.** Either `console.luxuryboma.com` once the domain is ready, or a Vercel alias added to `CONSOLE_DOMAINS`.
 - **Security advisor warnings** (6 on 18 Nov 2026): review and fix or record why they stay.
-- **Portal home instant-navigation warning** in development: `src/app/sites/[site]/page.tsx` awaits `params` outside `<Suspense>`. Fix with the portal milestone.
 - **The portal "feels like it's missing something"** (Tete, 18 Nov 2026). Ask what, after the staff side.
