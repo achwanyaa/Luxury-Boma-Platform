@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getProperty } from "@/lib/console/properties";
+import { DEALS, listingToInput } from "@/lib/console/listing-form";
 import { propertyToInput } from "@/lib/console/property-form";
 import { requireStaff } from "@/lib/console/staff";
 import { ui } from "../../ui";
-import { updateProperty } from "../actions";
+import { saveListing, updateProperty } from "../actions";
+import { ListingForm } from "../listing-form";
 import { PropertyForm } from "../property-form";
 import { StatusBadge } from "../status-badge";
 
@@ -16,7 +18,7 @@ const dateText = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Not yet";
 
 // Sections added by the next console steps (PLAN-CONSOLE.md 2 to 7).
-const STILL_TO_COME = ["Listing: deal, price, availability", "Facts with their provenance", "Photos, video walkthrough and 3D tour", "Documents", "Publishing"];
+const STILL_TO_COME = ["Facts with their provenance", "Photos, video walkthrough and 3D tour", "Documents", "Publishing"];
 
 export default function PropertyPage({ params }: PageProps<"/console/properties/[id]">) {
   return (
@@ -52,13 +54,43 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <PropertyForm
-          mode="edit"
-          action={updateProperty.bind(null, property.id)}
-          initial={propertyToInput(property)}
-          clients={client ? [client] : []}
-          isLive={property.status === "live"}
-        />
+        <div className="flex flex-col gap-8">
+          <section className="flex flex-col gap-3" aria-labelledby="listing-heading">
+            <div className="flex flex-col gap-0.5">
+              <h2 id="listing-heading" className={ui.h2}>
+                Listing
+              </h2>
+              <p className="text-sm text-muted">
+                One listing per deal. Realogic staff will later be able to change the price, availability and description; the rest stays with LuxuryBoma.
+              </p>
+            </div>
+            {DEALS.map((deal) => {
+              const listing = property.listings.find((l) => l.deal === deal);
+              return (
+                <ListingForm
+                  key={deal}
+                  deal={deal}
+                  exists={Boolean(listing)}
+                  propertyStatus={property.status}
+                  initial={listingToInput(listing, deal)}
+                  action={saveListing.bind(null, property.id, deal)}
+                />
+              );
+            })}
+          </section>
+          <section className="flex flex-col gap-3" aria-labelledby="details-heading">
+            <h2 id="details-heading" className={ui.h2}>
+              Details
+            </h2>
+            <PropertyForm
+              mode="edit"
+              action={updateProperty.bind(null, property.id)}
+              initial={propertyToInput(property)}
+              clients={client ? [client] : []}
+              isLive={property.status === "live"}
+            />
+          </section>
+        </div>
         <aside className={`${ui.card} flex flex-col gap-3`}>
           <h2 className={ui.h2}>Still to add here</h2>
           <ul className="flex flex-col gap-1.5 text-sm text-body">

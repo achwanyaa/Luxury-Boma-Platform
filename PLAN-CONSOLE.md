@@ -42,6 +42,8 @@ Out of scope here: the Realogic staff backend, buyer sign-up, booking, fit check
 
 ### 2. Listing
 
+**Done 25 Nov 2026.** A Listing section on the property page has one card per deal: "Add a to-let listing" or "Add a for-sale listing" opens the form. Each listing has a status, price on request or a KES price (per month or per year to let, total for sale), available from, a short availability note, a description, a live preview of the portal's price and availability lines, and a line saying whether the listing shows on the portal. Rules are in `src/lib/console/listing-form.ts` (tested in `tests/listing-form.test.ts`); `saveListing` is in `src/app/console/properties/actions.ts` and refreshes the portal cache. There is no delete; closing a listing takes it off the portal. Signed-in screens not checked by hand yet.
+
 - On the property hub: one form per deal (lease, sale; `unique (property_id, deal)`). Fields: price, currency (KES), period (month/year/total), price on request, available from, availability note, description, status (draft/active/paused/closed).
 - Reuse `formatPrice` and `availabilityText` from `src/lib/portal/listing-model.ts` to preview how the price line will read on the portal.
 
