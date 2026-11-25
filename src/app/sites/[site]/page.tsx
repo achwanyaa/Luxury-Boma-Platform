@@ -7,7 +7,7 @@ import { ListingCard } from "@/components/portal/ListingCard";
 import { ProvenancePill } from "@/components/ProvenancePill";
 import { applyFilters, parseFilters, SIZE_BANDS, whatsappLink } from "@/lib/portal/listing-model";
 import { getPortalListings } from "@/lib/portal/listings";
-import { DISCLOSURE, getSite } from "@/lib/sites";
+import { getSite } from "@/lib/sites";
 
 const WHAT_WE_DO = [
   {
@@ -73,7 +73,7 @@ export default async function PortalHome({ params }: PageProps<"/sites/[site]">)
             </h1>
             <p className="max-w-[560px] text-[17px] leading-[27px] text-muted">
               {site.name} leases and sells godowns, and fits them out for you. Every key fact on our
-              listings is labelled measured, from drawings or declared, and checked independently by LuxuryBoma.
+              listings is labelled measured, from drawings or declared, and checked by LuxuryBoma.
             </p>
 
             <Form action="/properties" className="flex flex-col gap-3 rounded-card border border-line bg-white p-4 shadow-[0_8px_30px_rgba(12,27,51,0.08)] sm:p-5">
@@ -235,7 +235,6 @@ export default async function PortalHome({ params }: PageProps<"/sites/[site]">)
               Most listings ask you to take the seller&apos;s word. Ours don&apos;t. Every fact carries one label,
               set by LuxuryBoma, not by us, and we can&apos;t edit or hide a verified fact.
             </p>
-            <p className="font-lb text-[13px] leading-5 text-lb-muted">{DISCLOSURE.full}</p>
           </div>
           <ul className="flex flex-col gap-3 text-[15px]">
             {(

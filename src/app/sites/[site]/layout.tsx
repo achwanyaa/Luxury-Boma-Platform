@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { DISCLOSURE, getSite, SITES } from "@/lib/sites";
+import { getSite, SITES } from "@/lib/sites";
 
 export function generateStaticParams() {
   return Object.keys(SITES).map((site) => ({ site }));
@@ -149,7 +149,7 @@ async function SiteFooter({ params }: { params: Params }) {
         </div>
         <div className="flex flex-[1_1_240px] flex-col gap-2 font-lb text-sm leading-[21px]">
           <span className="font-bold">Facts verified by LuxuryBoma</span>
-          <span className="text-[#C9D4E6]">{DISCLOSURE.short}</span>
+          <span className="text-[#C9D4E6]">Every key fact is labelled with how it was checked.</span>
         </div>
       </div>
       <div className="border-t border-[#22324F]">

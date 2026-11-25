@@ -11,7 +11,7 @@ One Next.js app and one Supabase database that serve many clients. The first cli
 - **LuxuryBoma**: Tete's company. Owns the platform and the verification work (measurements, scans, checks, the verification record, anonymised data). Licenses the platform to clients for flat fees. Takes no shares in and no revenue share from a client's sales.
 - **Realogic Properties Limited**: first client. Subsidiary of Sketch3D Ltd, a Kenyan architectural firm. Built most of the godowns (warehouses) it sells and leases. Owns its properties, listings, prices and leads.
 - **Sketch3D Ltd**: designed the godowns and owns copyright in the drawings.
-- **Tete**: founder of LuxuryBoma, also holds a personal stake in Realogic. This shared ownership must be disclosed on the site (wording in section 6).
+- **Tete**: founder of LuxuryBoma, also holds a personal stake in Realogic. On 25 Nov 2026 Tete decided the site will not mention this (see rule 5 in section 6).
 
 **Not building:** payments or escrow, rent management, accounting.
 
@@ -149,7 +149,7 @@ Visitors never see `/sites/...`; asking for it directly returns 404 because the 
 2. Realogic edits only price, availability and description on a listing.
 3. Every "From drawings" fact names its drawing and author, for example "Drawing A-101 rev C, Sketch3D Ltd (developer's architect)".
 4. A property goes live only after a LuxuryBoma site visit, and only a reviewer or admin publishes (an editor cannot publish their own work).
-5. Disclosure appears wherever verification is claimed: "Listed by Realogic · verified by LuxuryBoma. Realogic and LuxuryBoma share an owner." (constants in `src/lib/sites.ts`). Tete decided on 25 Nov 2026 that the public site names only Realogic and LuxuryBoma: not Sketch3D, and not who owns each godown. The shared-owner sentence must stay. Rule 3 is unchanged: a "From drawings" fact still names its drawing and author in its source.
+5. **No ownership disclosure on the site** (Tete's decision, 25 Nov 2026). The site names only Realogic as the lister and LuxuryBoma as the checker. It does not mention Sketch3D, who owns each godown, or that Realogic and LuxuryBoma share an owner; there is no `DISCLOSURE` constant any more. **Consequence: the site must not claim the checking is independent.** Don't write "independent", "impartial", "unbiased" or similar anywhere on the portal or luxuryboma.com. Say only what is true: LuxuryBoma sets the labels, and Realogic can't edit or hide a verified fact. Tete was told the risks: discovery of the shared ownership later, and misleading-omission rules under consumer protection law. The advocate review of this wording is still open (section 13). Rule 3 is unchanged: a "From drawings" fact still names its drawing and author in its source.
 6. In v1, LuxuryBoma enters all listing data.
 7. While Tete is the only staff member, editor and reviewer are the same person. Facts where `reviewed_by = checked_by` must be shown as "self-reviewed" so the verification page never overstates the checking.
 
@@ -247,7 +247,7 @@ Use Server Actions for writes with the server client, so row-level security appl
 
 ## 10. Later milestones
 
-3. **Verification and methodology pages.** A public LuxuryBoma page per property listing every fact with its label, source, date and correction history, plus a methodology page that explains the labels and discloses the shared ownership. Done when the badge on a listing opens this page.
+3. **Verification and methodology pages.** A public LuxuryBoma page per property listing every fact with its label, source, date and correction history, plus a methodology page that explains the labels (no ownership disclosure and no independence claim; rule 5). Done when the badge on a listing opens this page.
 4. **Realogic portal and dossier.** Listings, the godown dossier (gallery, 3D tour that loads only when tapped, key numbers grid, all specifications grouped and expandable with source detail, documents behind sign-in, location, booking/WhatsApp/save/spec sheet PDF sidebar, "Verified by LuxuryBoma" card with the measured / from drawings / other bar). Add the Properties and Fit check links back to the portal header. Done when live on Realogic's domain.
 5. **Fit check, sign-up, booking, messages, Realogic backend.** Details below. Done when a test booking reaches Realogic with its briefing.
 6. **luxuryboma.com.** Home, what we do, Realogic as first case study.
@@ -318,7 +318,7 @@ The prototype is the design source of truth, but it lives in claude.ai artifacts
 - SMS provider for sign-in codes.
 - Whether "required to publish" stays as the architect's five facts (clear height, slab load, yard turning, mezzanine capacity, incoming power). The catalogue marks those five now; nothing enforces it yet.
 - Real data for Godown A1: architect's drawings, site measurements, photos, Realsee link.
-- From the advocate: ownership disclosure wording, privacy notice and terms, licence agreement, Sketch3D's permission to show drawings, whether LuxuryBoma must register with the Office of the Data Protection Commissioner.
+- From the advocate: whether leaving out the shared ownership is acceptable (rule 5; Tete chose to leave it out on 25 Nov 2026), privacy notice and terms, licence agreement, Sketch3D's permission to show drawings, whether LuxuryBoma must register with the Office of the Data Protection Commissioner.
 - Which console address to use on Vercel: `console.luxuryboma.com` or a Vercel alias (section 15). (The database password is no longer needed, and the Vercel project sits under `achwanyaas-projects`.)
 
 ## 14. Working rules for this repo

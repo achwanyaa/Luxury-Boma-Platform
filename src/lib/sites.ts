@@ -44,11 +44,6 @@ export const SITES: Record<string, Site> = {
 export const LUXURYBOMA_DOMAINS = ["luxuryboma.com", "www.luxuryboma.com"];
 export const CONSOLE_DOMAINS = ["console.luxuryboma.com"];
 
-export const DISCLOSURE = {
-  short: "Realogic and LuxuryBoma share an owner. LuxuryBoma checks every listing the same way.",
-  full: "Listed by Realogic · verified by LuxuryBoma. Realogic and LuxuryBoma share an owner.",
-};
-
 export function getSite(slug: string): Site | undefined {
   return Object.hasOwn(SITES, slug) ? SITES[slug] : undefined;
 }

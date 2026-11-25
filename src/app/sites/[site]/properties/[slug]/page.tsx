@@ -15,7 +15,7 @@ import {
   type SpecGroup,
 } from "@/lib/portal/listing-model";
 import { getPortalProperty } from "@/lib/portal/listings";
-import { DISCLOSURE, getSite, type Site } from "@/lib/sites";
+import { getSite, type Site } from "@/lib/sites";
 
 type Props = PageProps<"/sites/[site]/properties/[slug]">;
 
@@ -147,7 +147,6 @@ function VerifiedCard({ property }: { property: PortalProperty }) {
       <p className="text-[13px] leading-5 text-lb-muted">
         LuxuryBoma sets every label, not us. We can&apos;t edit or hide a verified fact.
       </p>
-      <p className="border-t border-lb/15 pt-3 text-[13px] leading-5 text-lb-muted">{DISCLOSURE.full}</p>
     </div>
   );
 }
