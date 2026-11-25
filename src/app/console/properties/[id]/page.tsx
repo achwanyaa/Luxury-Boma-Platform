@@ -8,6 +8,7 @@ import { propertyToInput } from "@/lib/console/property-form";
 import { requireStaff } from "@/lib/console/staff";
 import { ui } from "../../ui";
 import { saveListing, updateProperty } from "../actions";
+import { FactsSection } from "../facts-section";
 import { ListingForm } from "../listing-form";
 import { PropertyForm } from "../property-form";
 import { StatusBadge } from "../status-badge";
@@ -18,7 +19,7 @@ const dateText = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Not yet";
 
 // Sections added by the next console steps (PLAN-CONSOLE.md 2 to 7).
-const STILL_TO_COME = ["Facts with their provenance", "Photos, video walkthrough and 3D tour", "Documents", "Publishing"];
+const STILL_TO_COME = ["Photos, video walkthrough and 3D tour", "Documents", "Publishing"];
 
 export default function PropertyPage({ params }: PageProps<"/console/properties/[id]">) {
   return (
@@ -34,7 +35,7 @@ export default function PropertyPage({ params }: PageProps<"/console/properties/
 }
 
 async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]">, "params">) {
-  await requireStaff();
+  const staff = await requireStaff();
   const { id } = await params;
   const property = await getProperty(id);
   if (!property) notFound();
@@ -78,6 +79,7 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
               );
             })}
           </section>
+          <FactsSection propertyId={property.id} propertyType={property.property_type} staff={staff} />
           <section className="flex flex-col gap-3" aria-labelledby="details-heading">
             <h2 id="details-heading" className={ui.h2}>
               Details
