@@ -72,6 +72,25 @@ export async function requireStaff(): Promise<Staff> {
   };
 }
 
+/**
+ * For the console header only: the two-factor staff member, or null. Never
+ * redirects, so the sign-in and two-factor pages can share the header.
+ * Pages and actions must still call requireStaff().
+ */
+export async function getStaff(): Promise<Staff | null> {
+  const supabase = await createClient();
+  const claims = await verifiedClaims(supabase);
+  if (!claims || claims.aal !== "aal2") return null;
+  const staff = await findLbStaff(supabase, claims.sub);
+  if (!staff) return null;
+  return {
+    userId: claims.sub,
+    email: typeof claims.email === "string" ? claims.email : null,
+    role: staff.role,
+    displayName: staff.display_name,
+  };
+}
+
 export type TwoFactorStep = { kind: "verify"; factorId: string } | { kind: "enrol" };
 
 /**

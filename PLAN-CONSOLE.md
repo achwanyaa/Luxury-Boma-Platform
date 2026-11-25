@@ -32,6 +32,8 @@ Out of scope here: the Realogic staff backend, buyer sign-up, booking, fit check
 
 ### 1. Console shell and properties
 
+**Done 25 Nov 2026.** Header with Properties and Sign out (`getStaff()` in `src/lib/console/staff.ts`, never redirects), home counts by status, `/properties` list, `/properties/new`, and the `/properties/[id]` hub with the details form and a "still to add" panel. Rules and database-error wording are in `src/lib/console/property-form.ts` (tested in `tests/property-form.test.ts`); reads are in `src/lib/console/properties.ts`; writes are in `src/app/console/properties/actions.ts`. Saving refreshes the portal cache tag. A property's client can't be changed after creation. Only the signed-out redirects were checked by hand; the signed-in screens need Tete's two-factor sign-in.
+
 - Console header: links to Properties and the signed-in name with Sign out (move it from the home page). Home page lists counts by status.
 - `/properties`: table of all properties (reference, name, client, status, site visit date, updated). "New property" button.
 - `/properties/new` and `/properties/[id]`: form for `client_id` (select from `clients`), `reference`, `name`, `slug` (suggested from the name; warn that changing it after publishing breaks shared links), `address`, `area_label`, `near`, `latitude`, `longitude`, `designed_by`, `developed_by`, `site_visited_on`.
