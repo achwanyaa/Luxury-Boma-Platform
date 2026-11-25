@@ -25,6 +25,24 @@ const SUPABASE_SHIM = `
     select auth.jwt() ->> 'role';
   $$;
   grant usage on schema auth to anon, authenticated, service_role;
+
+  -- Supabase Storage keeps its buckets and file records in the storage schema.
+  -- This stub has the columns our migrations and policies use; it proves the
+  -- policies, not the Storage API itself.
+  create schema storage;
+  create table storage.buckets (
+    id text primary key, name text not null, public boolean default false,
+    file_size_limit bigint, allowed_mime_types text[]
+  );
+  create table storage.objects (
+    id uuid primary key default gen_random_uuid(),
+    bucket_id text references storage.buckets (id), name text, owner uuid,
+    created_at timestamptz default now(), metadata jsonb
+  );
+  alter table storage.objects enable row level security;
+  grant usage on schema storage to anon, authenticated, service_role;
+  grant select, insert, update, delete on storage.objects to anon, authenticated;
+  grant select on storage.buckets to anon, authenticated;
   grant execute on all functions in schema auth to anon, authenticated, service_role;
 `;
 

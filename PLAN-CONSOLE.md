@@ -61,6 +61,8 @@ Out of scope here: the Realogic staff backend, buyer sign-up, booking, fit check
 
 ### 4. Media: photos, video walkthrough, tour link
 
+**Done 25 Nov 2026.** Migrations `20261125000100_media_video_kind.sql` and `20261125000200_property_media_bucket.sql` are applied to the real project, and the types are regenerated. The storage stub is in `tests/helpers/db.ts`, with policy tests in `tests/storage.test.ts`. The live bucket was checked with a test file, since deleted: public, 50 MB, photos and MP4 only, visitors refused, public URL served, text refused. The property page has a "Photos, video and 3D tour" section: add several photos, captions, order, main photo, remove; one video walkthrough (upload, replace, remove); the Realsee link. Rules are in `src/lib/console/media-rules.ts` (tested); actions are in `src/app/console/properties/media-actions.ts`; the screen is `media-section.tsx`. The browser uploads to `<client>/<property>/<uuid>.<ext>`, the server checks the path belongs to the property before recording it, and an unrecorded upload is removed again. Not checked yet: an upload while signed in as staff.
+
 New migration (one file):
 
 - `alter type public.media_kind add value 'video';` (do not use the new value elsewhere in the same file).

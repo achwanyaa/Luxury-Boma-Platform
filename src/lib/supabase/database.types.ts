@@ -1084,7 +1084,7 @@ export type Database = {
         | "not_enough_data"
       lead_stage: "new" | "visit_booked" | "visited" | "offer" | "won" | "lost"
       listing_status: "draft" | "active" | "paused" | "closed"
-      media_kind: "tour" | "photo" | "scan"
+      media_kind: "tour" | "photo" | "scan" | "video"
       property_status:
         | "draft"
         | "in_review"
@@ -1262,7 +1262,7 @@ export const Constants = {
       ],
       lead_stage: ["new", "visit_booked", "visited", "offer", "won", "lost"],
       listing_status: ["draft", "active", "paused", "closed"],
-      media_kind: ["tour", "photo", "scan"],
+      media_kind: ["tour", "photo", "scan", "video"],
       property_status: [
         "draft",
         "in_review",

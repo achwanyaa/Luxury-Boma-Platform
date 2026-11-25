@@ -15,3 +15,8 @@ export function createPublicClient() {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 }
+
+/** The public address of a file in a public Storage bucket (no request is made). */
+export function publicFileUrl(bucket: string, path: string): string {
+  return createPublicClient().storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}

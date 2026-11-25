@@ -4,12 +4,15 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getProperty } from "@/lib/console/properties";
 import { DEALS, listingToInput } from "@/lib/console/listing-form";
+import { MEDIA_BUCKET } from "@/lib/console/media-rules";
 import { propertyToInput } from "@/lib/console/property-form";
+import { publicFileUrl } from "@/lib/supabase/public";
 import { requireStaff } from "@/lib/console/staff";
 import { ui } from "../../ui";
 import { saveListing, updateProperty } from "../actions";
 import { FactsSection } from "../facts-section";
 import { ListingForm } from "../listing-form";
+import { MediaSection } from "../media-section";
 import { PropertyForm } from "../property-form";
 import { StatusBadge } from "../status-badge";
 
@@ -19,7 +22,7 @@ const dateText = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Not yet";
 
 // Sections added by the next console steps (PLAN-CONSOLE.md 2 to 7).
-const STILL_TO_COME = ["Photos, video walkthrough and 3D tour", "Documents", "Publishing"];
+const STILL_TO_COME = ["Documents", "Publishing"];
 
 export default function PropertyPage({ params }: PageProps<"/console/properties/[id]">) {
   return (
@@ -41,6 +44,14 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
   if (!property) notFound();
 
   const client = property.clients;
+  const fileUrl = (m: { file_path: string | null; url: string | null }) =>
+    m.file_path ? publicFileUrl(MEDIA_BUCKET, m.file_path) : (m.url ?? "");
+  const photos = property.media
+    .filter((m) => m.kind === "photo")
+    .toSorted((a, b) => a.sort_order - b.sort_order)
+    .map((m) => ({ id: m.id, url: fileUrl(m), caption: m.caption ?? "", isMain: m.is_main }));
+  const video = property.media.find((m) => m.kind === "video");
+  const tour = property.media.find((m) => m.kind === "tour");
   return (
     <>
       <div className="flex flex-col gap-1.5">
@@ -79,6 +90,13 @@ async function PropertyHub({ params }: Pick<PageProps<"/console/properties/[id]"
               );
             })}
           </section>
+          <MediaSection
+            propertyId={property.id}
+            clientId={property.client_id}
+            photos={photos}
+            video={video ? { id: video.id, url: fileUrl(video) } : null}
+            tourUrl={tour?.url ?? null}
+          />
           <FactsSection propertyId={property.id} propertyType={property.property_type} staff={staff} />
           <section className="flex flex-col gap-3" aria-labelledby="details-heading">
             <h2 id="details-heading" className={ui.h2}>
