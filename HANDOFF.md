@@ -55,6 +55,8 @@ Last updated 23 Nov 2026:
 
 **What remains, in order**
 
+The console build now follows `PLAN-CONSOLE.md` (25 Nov 2026): it sets the step order, adds the video walkthrough and storage buckets, and ends with the Rafiki godown going live. Read it before item 2 below.
+
 1. Tete signs in at `http://console.localhost:3000/sign-in` and sets up the authenticator app. Report anything that breaks.
 2. Milestone 2 steps 2 to 7 (section 9): properties list and create/edit with a publish button that says why it is blocked, the facts editor, documents (private storage bucket, new migration), media, listing, catalogue screens.
 3. Operational items: review the 6 security advisor warnings (needs a screenshot of the Warnings tab or the dashboard, since the advisor has no CLI command), and choose a console address on Vercel (section 15).
