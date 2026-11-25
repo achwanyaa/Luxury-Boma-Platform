@@ -21,7 +21,7 @@ Last updated 23 Nov 2026:
 
 | Thing | State |
 | --- | --- |
-| GitHub | `https://github.com/achwanyaa/Realogic`, branch `main`. Everything up to the console sign-in is committed and pushed. Tete may switch the repo to private; until then treat it as public. |
+| GitHub | `https://github.com/achwanyaa/Luxury-Boma-Platform` (renamed from `Realogic` in Nov 2026; the old address redirects), branch `main`. Everything up to the console build plan is committed and pushed. Tete may switch the repo to private; until then treat it as public. |
 | Local folder | `C:\Users\sajim\Desktop\Realogic` (Windows, PowerShell). |
 | Supabase project | ref `dlgqgtyiqclyduxkckgi`. API keys work (new `sb_publishable_` / `sb_secret_` format). **The 4 migrations are applied** (11 Nov 2026) and the API sees the 14 catalogue rows; anon is refused on clients, staff, buyers, events and audit. The real Realogic `clients` row is in (id `8342d565-ad5d-42e6-8795-d48e669ebcd6`). Types are generated in `src/lib/supabase/database.types.ts`. The repo folder is linked (`npx supabase link`). The current CLI targets a local stack by default: pass `--remote` to `db push` and `gen types`; it uses a temporary login role, so no database password is needed. Security advisor run 18 Nov 2026: 0 errors, 6 warnings still to review. The first admin exists: Tete's auth user has an `lb_admin` staff row (email marked confirmed through the admin API on 18 Nov 2026). Phone sign-in is off, email sign-in is on. |
 | Console | Staff sign-in with two-factor is built (milestone 2, step 1). Local: `http://console.localhost:3000/sign-in`. Not reachable on Vercel yet: no console host is mapped (`CONSOLE_DOMAINS` in `src/lib/sites.ts`). |
