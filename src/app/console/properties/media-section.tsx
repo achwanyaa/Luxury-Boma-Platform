@@ -330,7 +330,7 @@ function Tour({ propertyId, tourUrl }: Props) {
     <form action={action} className={`${ui.card} flex flex-col gap-3`}>
       <div className="flex flex-col gap-0.5">
         <h3 className="font-lb font-bold text-lb-deep">3D tour</h3>
-        <p className="text-sm text-muted">The Realsee link. Buyers open it from a “Walk through in 3D” button. Clear the box to remove it.</p>
+        <p className="text-sm text-muted">The Realsee link. It plays inside the gallery on the property page when a buyer taps “Walk through in 3D”. Clear the box to remove it.</p>
       </div>
       <div className="flex flex-wrap gap-2">
         <input

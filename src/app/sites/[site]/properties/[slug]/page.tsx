@@ -208,7 +208,8 @@ async function PropertyDetails({ params }: Pick<Props, "params">) {
             {headline.length > 0 && (
               <section className="flex flex-col gap-3">
                 <h2 className="text-[22px] font-extrabold text-navy">Key numbers</h2>
-                <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-3">
+                {/* The last cell stretches over any gap, so an odd count never leaves an empty grey box. */}
+                <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-3 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(3n+1)]:col-span-3 sm:[&>*:last-child:nth-child(3n+2)]:col-span-2">
                   {headline.map((fact) => (
                     <div key={fact.key} className="flex flex-col gap-1.5 bg-white p-4">
                       <dt className="text-xs font-semibold tracking-[0.6px] text-muted uppercase">{fact.headlineLabel}</dt>
